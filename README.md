@@ -68,11 +68,39 @@ data leaves the page.
   detail. The colour lives where it belongs — in the clip previews and
   the % ring.
 
+## Watching clips here
+
+Every clip card has a **Watch** button: it opens a YouTube player inside
+the card, starting at that clip's real moment in the real source stream
+(start seconds come from the engine's job records). It plays the source
+footage, not the rendered vertical MP4 — the rendered MP4s with burned-in
+captions play and download in the live app.
+
+## Google sign-in
+
+The sidebar's **Sign in with Google** button runs the real Google
+Identity Services flow. It needs this site's own free OAuth Client ID:
+
+1. Google Cloud Console → APIs & Services → Credentials → Create
+   credentials → OAuth client ID → Web application.
+2. Under "Authorized JavaScript origins" add
+   `https://mrjmizanurrahman.github.io`.
+3. Paste the Client ID into `GOOGLE_CLIENT_ID` at the top of the
+   sign-in section in `app.js`.
+
+A Client ID is public (it is sent to every visitor's browser), not a
+secret. Until it is added, the button explains this instead of opening a
+dead popup. On a static site, sign-in shows your Google name and photo;
+it cannot unlock clip generation, because generation needs the engine.
+
 ## Honest limits
 
-- This demo cannot render video; downloads here are small "clip kit" text
-  files (Export-all bundles them into a real .zip). The live app downloads
-  the real MP4s.
+- This demo cannot render video or generate new clips — GitHub Pages
+  serves static files only, and clipping needs a running engine
+  (FFmpeg + speech model + AI). Generation works in the live app inside
+  Muse, and on the owner's PC setup. Downloads here are small "clip kit"
+  text files (Export-all bundles them into a real .zip). The live app
+  downloads the real MP4s.
 - GPU rendering (CUDA / NVENC), in-browser timeline rendering, phone-side
   offline processing and platform OAuth sign-in are planned, not faked —
   they need hardware or accounts this setup does not have.

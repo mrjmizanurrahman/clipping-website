@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ClipKoro — Link dao, best clip nao</title>
-<link rel="stylesheet" href="styles.css?v=8">
+<link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
 <div class="app">
@@ -32,12 +32,16 @@
       <div class="status-line"><span class="dot ok"></span> AI ready · no key needed</div>
       <div class="status-line"><span class="dot warn"></span> GPU: none on engine machine · CPU rendering</div>
     </div>
-    <div class="profile-card">
-      <div class="avatar">M</div>
+    <div class="profile-card" id="profileCard">
+      <div class="avatar" id="profileAvatar">M</div>
       <div>
-        <div class="profile-name">Mizanur Rahman</div>
-        <div class="profile-sub">Creator account</div>
+        <div class="profile-name" id="profileName">Mizanur Rahman</div>
+        <div class="profile-sub" id="profileSub">Creator account</div>
       </div>
+    </div>
+    <div id="googleSigninArea">
+      <button class="btn gbtn" id="googleSigninBtn">Sign in with Google</button>
+      <div class="note" id="googleSigninNote" hidden>Google sign-in is wired and ready — it goes live as soon as the site's free Google Client ID is added (one value in app.js, see README). On this static demo, sign-in only shows your Google name and photo here; making real clips still needs the engine in the full app.</div>
     </div>
   </aside>
 
@@ -265,6 +269,7 @@
     </footer>
   </main>
 </div>
-<script src="app.js?v=8"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="app.js?v=9"></script>
 </body>
 </html>

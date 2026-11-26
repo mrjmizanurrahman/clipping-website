@@ -108,18 +108,20 @@
   paintPreview();
 
   // ---- Clip data: the real renders from the live app ----
+  // yt + start: the real source stream and the clip's real start second in it,
+  // taken from the engine's job records, so Watch plays the actual moment.
   var clips = [
-    { title: "Narrow Escape from a Cop Car", score: 85, dur: 27, project: "GTA 6 DAY 3" },
-    { title: "10k Deposit Chaos", score: 82, dur: 17, project: "GTA 6 DAY 3" },
-    { title: "Unexpected Luxury Car Reveal", score: 78, dur: 27, project: "GTA 6 DAY 3" },
-    { title: "Bridge Crossing Chaos", score: 75, dur: 18, project: "GTA 6 DAY 3" },
-    { title: "Four Stars to Strip Club Chaos", score: 70, dur: 16, project: "GTA 6 DAY 3" },
-    { title: "Dylan Goes After Paul Walker's Car", score: 70, dur: 17, project: "GTA 6 DAY 3" },
-    { title: "Accidental Store Robbery in GTA 6", score: 83, dur: 46, project: "GTA 6 DAY 4" },
-    { title: "Escaping a 6 Star Wanted Level in GTA 6", score: 82, dur: 38, project: "GTA 6 DAY 4" },
-    { title: "69 Hours into GTA 6 and Only 51% Done", score: 82, dur: 30, project: "GTA 6 DAY 4" },
-    { title: "Escaping the Cops in GTA 6", score: 78, dur: 34, project: "GTA 6 DAY 4" },
-    { title: "Taking hot sauce shots every time they die in GTA 6", score: 78, dur: 29, project: "GTA 6 DAY 4" }
+    { title: "Narrow Escape from a Cop Car", score: 85, dur: 27, project: "GTA 6 DAY 3", yt: "tvT6ZVHOtWs", start: 8275 },
+    { title: "10k Deposit Chaos", score: 82, dur: 17, project: "GTA 6 DAY 3", yt: "tvT6ZVHOtWs", start: 6889 },
+    { title: "Unexpected Luxury Car Reveal", score: 78, dur: 27, project: "GTA 6 DAY 3", yt: "tvT6ZVHOtWs", start: 2474 },
+    { title: "Bridge Crossing Chaos", score: 75, dur: 18, project: "GTA 6 DAY 3", yt: "tvT6ZVHOtWs", start: 7303 },
+    { title: "Four Stars to Strip Club Chaos", score: 70, dur: 16, project: "GTA 6 DAY 3", yt: "tvT6ZVHOtWs", start: 4896 },
+    { title: "Dylan Goes After Paul Walker's Car", score: 70, dur: 17, project: "GTA 6 DAY 3", yt: "tvT6ZVHOtWs", start: 6419 },
+    { title: "Accidental Store Robbery in GTA 6", score: 83, dur: 46, project: "GTA 6 DAY 4", yt: "LEAdEczRNEc", start: 2810 },
+    { title: "Escaping a 6 Star Wanted Level in GTA 6", score: 82, dur: 38, project: "GTA 6 DAY 4", yt: "LEAdEczRNEc", start: 2009 },
+    { title: "69 Hours into GTA 6 and Only 51% Done", score: 82, dur: 30, project: "GTA 6 DAY 4", yt: "LEAdEczRNEc", start: 3688 },
+    { title: "Escaping the Cops in GTA 6", score: 78, dur: 34, project: "GTA 6 DAY 4", yt: "LEAdEczRNEc", start: 3213 },
+    { title: "Taking hot sauce shots every time they die in GTA 6", score: 78, dur: 29, project: "GTA 6 DAY 4", yt: "LEAdEczRNEc", start: 4444 }
   ];
 
   function fmt(s) { return "0:" + String(Math.round(s)).padStart(2, "0"); }
@@ -149,8 +151,9 @@
       '<button class="btn" data-d="5">+5s</button><button class="btn" data-d="10">+10s</button>' +
       '<input class="length-input" type="number" min="5" max="120" value="' + Math.round(clip.dur) + '">' +
       '<button class="btn rerender">Re-render</button></div>' +
-      '<div class="clip-actions"><button class="btn small download">Download</button>' +
-      '<button class="btn small approve">Approve</button><button class="btn small danger reject">Reject</button></div>';
+      '<div class="clip-actions"><button class="btn small watch">Watch</button><button class="btn small download">Download</button>' +
+      '<button class="btn small approve">Approve</button><button class="btn small danger reject">Reject</button></div>' +
+      '<div class="watch-slot"></div>';
     card.querySelector(".clip-title").textContent = clip.title;
     card.querySelector(".score").textContent = clip.score;
     var meta = card.querySelector(".clip-meta");
@@ -170,6 +173,16 @@
       setTimeout(function () { btn.textContent = "Re-render"; paint(); showToast("Length updated (demo) — in the full app this really re-renders"); }, 900);
     });
     card.querySelector(".download").addEventListener("click", function () { kit(clip); });
+    card.querySelector(".watch").addEventListener("click", function () {
+      var slot = card.querySelector(".watch-slot");
+      if (slot.firstChild) { slot.innerHTML = ""; this.textContent = "Watch"; return; }
+      var end = Math.round(clip.start + clip.dur);
+      slot.innerHTML = '<div class="watch-wrap"><iframe src="https://www.youtube.com/embed/' + clip.yt +
+        '?start=' + Math.round(clip.start) + '&end=' + end + '&rel=0&autoplay=1" title="Clip moment" ' +
+        'referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>' +
+        '<div class="note" style="margin-top:6px">Plays the real source stream at this clip\'s moment. The rendered vertical MP4 with captions plays in the full app.</div>';
+      this.textContent = "Close";
+    });
     card.querySelector(".approve").addEventListener("click", function () {
       this.textContent = "Approved"; this.disabled = true;
       showToast("Approved (demo)");
@@ -385,6 +398,48 @@
     });
     document.getElementById("settingsSaved").hidden = false;
     showToast("Defaults saved (demo)");
+  });
+
+  // ---- Google sign-in (real GIS flow; needs the site's free Client ID) ----
+  // Get one free: Google Cloud Console → APIs & Services → Credentials →
+  // Create OAuth client ID (Web application) → add https://mrjmizanurrahman.github.io
+  // under "Authorized JavaScript origins" → paste the client ID below.
+  // A Client ID is public information (it ships in every visitor's page), not a secret.
+  var GOOGLE_CLIENT_ID = "";
+  var gBtn = document.getElementById("googleSigninBtn");
+  var gNote = document.getElementById("googleSigninNote");
+  function jwtPayload(token) {
+    var part = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(decodeURIComponent(escape(window.atob(part))));
+  }
+  function onGoogleCredential(resp) {
+    try {
+      var p = jwtPayload(resp.credential);
+      document.getElementById("profileName").textContent = p.name || "Signed in";
+      document.getElementById("profileSub").textContent = p.email || "Signed in with Google";
+      var av = document.getElementById("profileAvatar");
+      if (p.picture) { av.innerHTML = '<img src="' + p.picture + '" alt="" style="width:100%;height:100%;border-radius:50%">'; }
+      gBtn.textContent = "Sign out";
+      showToast("Signed in with Google (demo) — welcome, " + (p.given_name || "creator"));
+    } catch (e) { showToast("Sign-in answer could not be read — try again"); }
+  }
+  if (gBtn) gBtn.addEventListener("click", function () {
+    if (gBtn.textContent === "Sign out") {
+      if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect();
+      document.getElementById("profileName").textContent = "Mizanur Rahman";
+      document.getElementById("profileSub").textContent = "Creator account";
+      document.getElementById("profileAvatar").textContent = "M";
+      gBtn.textContent = "Sign in with Google";
+      showToast("Signed out (demo)");
+      return;
+    }
+    if (!GOOGLE_CLIENT_ID) { gNote.hidden = false; return; }
+    if (window.google && google.accounts && google.accounts.id) {
+      google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: onGoogleCredential });
+      google.accounts.id.prompt();
+    } else {
+      showToast("Google sign-in is still loading — try again in a few seconds");
+    }
   });
 
   // ---- Real device detection (same idea as the live app's "This device" card) ----
