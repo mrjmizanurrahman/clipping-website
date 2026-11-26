@@ -31,6 +31,9 @@ animates the flow but does not render video.
   says so honestly
 - **Roadmap** — a 33-item feature checklist with honest status
   (13 done, 13 partial via the engine, 7 planned)
+- **Polished layout** — sidebar navigation switches views (no long scroll),
+  stat cards show full labels with sparklines in their own row, and long
+  titles wrap instead of being cut off
 
 ## Files
 
