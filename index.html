@@ -8,27 +8,96 @@
 </head>
 <body>
 <header class="topbar">
-  <div class="logo">✂️ ClipKoro</div>
-  <div class="tagline">Link dao, best clip nao</div>
+  <div class="brand">
+    <div class="logo-mark">✂️</div>
+    <div>
+      <div class="logo">ClipKoro</div>
+      <div class="tagline">Link dao, best clip nao</div>
+    </div>
+  </div>
+  <div class="profile-card">
+    <div class="avatar">M</div>
+    <div class="profile-text">
+      <strong>Mizanur</strong>
+      <small>Signed in with Google</small>
+    </div>
+  </div>
 </header>
 
 <main>
-  <section class="hero">
-    <h1>Paste a stream link.<br/>Get the best clips.</h1>
-    <p>Works with <strong>YouTube</strong>, <strong>Twitch</strong> and <strong>Kick</strong>.
-    ClipKoro finds the best moments and turns them into captioned vertical clips.</p>
+  <section class="panel engine-panel">
+    <div class="panel-head">
+      <h2>ClipKoro Engine — full power, no key</h2>
+      <div class="badges">
+        <span class="badge badge-on">⚡ FULL POWER MODE: ON</span>
+        <span class="badge badge-key">🔑 NO KEY NEEDED</span>
+      </div>
+    </div>
+    <div class="engine-grid">
+      <div class="engine-stat">
+        <label>AI</label>
+        <p>✅ Ready — Gemini + free backup AI</p>
+      </div>
+      <div class="engine-stat">
+        <label>Render quality</label>
+        <p>1080×1920 · vertical 9:16 · captions burned in</p>
+      </div>
+      <div class="engine-stat gauge-stat">
+        <label>Engine power (CPU)</label>
+        <div class="gauge"><div id="cpuGauge" class="gauge-fill"></div></div>
+        <p id="cpuText" class="gauge-text">Checking…</p>
+      </div>
+    </div>
+    <div class="device-card">
+      <h3>💻 This device</h3>
+      <p id="deviceInfo">Detecting your device…</p>
+      <p class="muted">This page and the players run on your device. The heavy rendering runs on the engine computer.</p>
+    </div>
+  </section>
 
+  <section class="panel">
+    <h2>🎬 Make Real Clips</h2>
     <form id="clipForm" class="submit-box">
       <input id="streamUrl" type="url" required
         placeholder="Paste YouTube / Twitch / Kick stream link…" />
-      <select id="clipCount" aria-label="How many clips">
-        <option value="3">3 clips</option>
-        <option value="5" selected>5 clips</option>
-        <option value="10">10 clips</option>
-      </select>
-      <button type="submit">🎬 Make Clips</button>
+      <div class="form-row">
+        <label>Clips
+          <select id="clipCount">
+            <option value="3">3</option>
+            <option value="5" selected>5</option>
+            <option value="10">10</option>
+          </select>
+        </label>
+        <label>Max length
+          <select id="clipLength">
+            <option value="30">30s</option>
+            <option value="45" selected>45s</option>
+            <option value="60">60s</option>
+          </select>
+        </label>
+        <label>Language
+          <select id="clipLang">
+            <option value="en" selected>English</option>
+            <option value="banglish">Banglish</option>
+            <option value="bn">Bangla</option>
+          </select>
+        </label>
+        <label>Caption style
+          <select id="captionStyle">
+            <option>Bold Pop</option>
+            <option>Karaoke</option>
+            <option>Neon Glow</option>
+            <option>Minimal</option>
+            <option>Comic Pop</option>
+            <option>Typewriter</option>
+            <option>Cinema</option>
+            <option>Bubble</option>
+          </select>
+        </label>
+      </div>
+      <button type="submit" class="make-btn">🎬 Make Clips</button>
     </form>
-    <p id="platformBadge" class="badge"></p>
+    <p id="platformBadge" class="badge-line"></p>
 
     <div id="progressWrap" class="progress-wrap hidden">
       <div class="ring">
@@ -41,12 +110,18 @@
     </div>
   </section>
 
-  <section>
+  <section class="panel">
     <h2>Clips</h2>
-    <div id="status" class="status">No clips yet — paste a link above to make some.</div>
+    <div class="render-head">
+      <div>
+        <strong id="renderTitle">FIRST TO BEAT GTA 6 (By Cheating) | DAY 4</strong>
+        <p class="muted" id="renderMeta">Real renders · 1 video · Done</p>
+      </div>
+      <button type="button" class="zip-btn" id="zipBtn">⬇ Download all (zip)</button>
+    </div>
     <div id="clips" class="clips"></div>
-    <p class="demo-note">Static demo: the live ClipKoro app renders real MP4 clips with the
-    PeakCut engine. This page only previews the design and flow.</p>
+    <p class="demo-note">Static demo of the ClipKoro design — in the live app (inside Muse) these are
+    real MP4 clips rendered by the PeakCut engine, with working play and download.</p>
   </section>
 </main>
 
