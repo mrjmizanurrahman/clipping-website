@@ -3,45 +3,45 @@
 Paste a YouTube / Twitch / Kick stream link, get the best moments back as
 captioned vertical clips, ready for Shorts / TikTok / Reels.
 
-## What ClipKoro does
+This repo holds the **static demo** of ClipKoro, mirroring the live app's
+current ClipForge-style interface. The live app runs inside Muse, connected
+to the real PeakCut engine, and renders actual MP4 files. This static copy
+animates the flow but does not render video.
 
-1. **Make Clips** — paste a stream link, choose how many clips (3 / 5 / 10),
-   and ClipKoro sends it to the rendering engine.
-2. The engine downloads the stream, transcribes the speech, and uses AI to
-   find the best moments (big reactions, funny/chaotic moments, highlights).
-3. **Clips** — finished clips appear in the Clips section: play them, download
-   the MP4, download all as a zip, or delete a clip you don't want.
+## What the live app does
 
-That is the whole app — just **Make Clips** and **Clips**. Simple on purpose.
+- **Create Clip** — paste a stream link (or many, with Batch Import), pick
+  clip duration (15s–90s / custom), highlights count (3–20), caption style
+  and language (English / Bangla / Banglish / Hindi)
+- **Automatic highlights** — the engine transcribes with Whisper, scores the
+  best moments, and renders vertical **9:16, 1080×1920** MP4s with captions
+  burned in
+- **⏱ Clip length adjust** — make any clip longer or shorter (−10s…+10s or
+  custom); the engine re-renders that moment and replaces the clip
+- **Approve / Reject** on suggested clips, per-clip Play / MP4 download /
+  Delete, one-click ZIP export of a whole project
+- **Dashboard** — real totals, processing history, recent activity, engine
+  and AI status
+- **Projects** — search, sort, favorite, rename, duplicate, delete
+- **Caption Studio** — 8 styles (Bold Pop, Karaoke, Neon Glow, Minimal,
+  Comic Pop, Typewriter, Cinema, Bubble) in one global brand kit
+- **Export Studio** — Shorts / TikTok / Reels presets, export history
+- **No key needed** — best-moment AI runs through a free fallback chain;
+  **no GPU on the engine machine**, so rendering is CPU-based and the site
+  says so honestly
+- **Roadmap** — a 33-item feature checklist with honest status
+  (13 done, 13 partial via the engine, 7 planned)
 
-## Output
+## Files
 
-- **Vertical 9:16 only** — 1080×1920 MP4, captions burned into the video.
-- Every clip gets an AI score so the best moments are easy to spot first.
+- `index.html` — the dashboard (sidebar, hero, stats, create flow, clips)
+- `styles.css` — dark purple ClipForge-style theme
+- `app.js` — view switching, demo % ring, clip-length demo controls,
+  real device detection
 
-## How it works (engine)
+## Honest limits
 
-- Rendering engine: **PeakCut** (Python + FFmpeg + Whisper speech-to-text).
-- AI moment-finding runs through a free Gemini key with an automatic free
-  fallback (Pollinations) — **no paid API key needed**.
-- The engine currently runs on a CPU server (no GPU on that machine yet);
-  rendering works, it is just CPU-paced.
-
-## This repository
-
-This repo holds the static front-end demo of ClipKoro (`index.html`,
-`styles.css`, `app.js`) — open `index.html` in a browser or serve the folder:
-
-```bash
-npx serve .
-```
-
-The **live app** (connected to the real engine, real clips) runs as a
-full-stack app inside Muse, so it has no public URL; this demo shows the
-same design and flow without the engine behind it.
-
-## Supported platforms
-
-- YouTube
-- Twitch
-- Kick
+- Hype scores are AI-estimated, not live-chat telemetry.
+- Twitch / Kick clips open via timestamped watch links in the planner;
+  rendered MP4s come from the engine for downloadable sources.
+- CUDA / NVENC would need the engine on a GPU machine — planned, not faked.

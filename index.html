@@ -1,131 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ClipKoro — Link dao, best clip nao</title>
-<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="topbar">
-  <div class="brand">
-    <div class="logo-mark">✂️</div>
-    <div>
-      <div class="logo">ClipKoro</div>
-      <div class="tagline">Link dao, best clip nao</div>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">🎬 ClipKoro</div>
+    <nav>
+      <a class="nav-item active" data-view="dashboard">▦ Dashboard</a>
+      <a class="nav-item" data-view="create">✂ Create Clip</a>
+      <a class="nav-item" data-view="captions">💬 Caption Studio</a>
+      <a class="nav-item" data-view="export">⬆ Export</a>
+      <a class="nav-item" data-view="projects">🗂 Projects</a>
+      <a class="nav-item" data-view="roadmap">🗺 Roadmap</a>
+      <a class="nav-item" data-view="settings">⚙ Settings</a>
+    </nav>
+    <div class="proc-card">
+      <div class="proc-title">Processing Status</div>
+      <div class="proc-row"><span>CPU</span><div class="bar"><div id="cpuBar" style="width:42%"></div></div><span id="cpuVal">42%</span></div>
+      <div class="proc-row"><span>GPU</span><span class="muted">none on this machine — CPU rendering</span></div>
+      <div class="proc-row"><span>AI</span><span class="ok">● Ready (no key needed)</span></div>
     </div>
-  </div>
-  <div class="profile-card">
-    <div class="avatar">M</div>
-    <div class="profile-text">
-      <strong>Mizanur</strong>
-      <small>Signed in with Google</small>
-    </div>
-  </div>
-</header>
+    <div class="pro-card">✦ ClipKoro Pro<br><span>All features are already free in this build.</span></div>
+    <div class="side-foot">v2.0.0 • Local Mode</div>
+  </aside>
 
-<main>
-  <section class="panel engine-panel">
-    <div class="panel-head">
-      <h2>ClipKoro Engine — full power, no key</h2>
-      <div class="badges">
-        <span class="badge badge-on">⚡ FULL POWER MODE: ON</span>
-        <span class="badge badge-key">🔑 NO KEY NEEDED</span>
-      </div>
-    </div>
-    <div class="engine-grid">
-      <div class="engine-stat">
-        <label>AI</label>
-        <p>✅ Ready — Gemini + free backup AI</p>
-      </div>
-      <div class="engine-stat">
-        <label>Render quality</label>
-        <p>1080×1920 · vertical 9:16 · captions burned in</p>
-      </div>
-      <div class="engine-stat gauge-stat">
-        <label>Engine power (CPU)</label>
-        <div class="gauge"><div id="cpuGauge" class="gauge-fill"></div></div>
-        <p id="cpuText" class="gauge-text">Checking…</p>
-      </div>
-    </div>
-    <div class="device-card">
-      <h3>💻 This device</h3>
-      <p id="deviceInfo">Detecting your device…</p>
-      <p class="muted">This page and the players run on your device. The heavy rendering runs on the engine computer.</p>
-    </div>
-  </section>
+  <!-- Main -->
+  <main class="main">
+    <header class="topbar">
+      <div class="search">🔍 Search your projects… <kbd>Ctrl K</kbd></div>
+      <span class="pill-green">● Local Mode</span>
+      <span class="bell">🔔 3</span>
+      <div class="profile"><div class="avatar">M</div><div><b>Mizanur Rahman</b><br><span class="muted">@mrjmizanurrahman</span></div></div>
+    </header>
 
-  <section class="panel">
-    <h2>🎬 Make Real Clips</h2>
-    <form id="clipForm" class="submit-box">
-      <input id="streamUrl" type="url" required
-        placeholder="Paste YouTube / Twitch / Kick stream link…" />
-      <div class="form-row">
-        <label>Clips
-          <select id="clipCount">
-            <option value="3">3</option>
-            <option value="5" selected>5</option>
-            <option value="10">10</option>
+    <!-- DASHBOARD VIEW -->
+    <section id="view-dashboard" class="view">
+      <div class="hero">
+        <div>
+          <h1>Turn Long Videos into<br><span class="grad">Short Viral Clips</span></h1>
+          <p>Auto Clipping • Perfect Captions • 9:16 Vertical</p>
+          <button class="btn-grad" data-goto="create">Create Your First Clip</button>
+        </div>
+        <div class="hero-art">🎮⚡🚀</div>
+      </div>
+      <div class="stats">
+        <div class="stat"><span>Total Clips</span><b>13</b></div>
+        <div class="stat"><span>Projects</span><b>3</b></div>
+        <div class="stat"><span>Video Processed</span><b>~16h</b></div>
+        <div class="stat"><span>Export Quality</span><b>1080p</b></div>
+      </div>
+      <h2>Your Projects</h2>
+      <div class="projects" id="projectsRow"></div>
+      <h2>Recent Activity</h2>
+      <div class="panel activity">
+        <div>✅ GTA 6 DAY 3 — 6 clips rendered <span class="muted">• finished</span></div>
+        <div>✅ GTA 6 DAY 4 — 5 clips rendered <span class="muted">• finished</span></div>
+        <div>⏱ “Narrow Escape from a Cop Car” re-rendered at 26.9s <span class="muted">• clip length +10s</span></div>
+      </div>
+    </section>
+
+    <!-- CREATE VIEW -->
+    <section id="view-create" class="view hidden">
+      <div class="create-grid">
+        <div class="panel">
+          <h3>1. Select Video Source</h3>
+          <div class="sources">
+            <button class="src">📁 Local Video</button>
+            <button class="src">🟣 Twitch</button>
+            <button class="src">🟢 Kick</button>
+            <button class="src active">▶ YouTube</button>
+          </div>
+          <div class="drop">⬆ Drag &amp; drop your video file here<br><span class="muted">Supports: MP4, MOV, MKV, WebM</span></div>
+          <input id="linkInput" class="link-input" placeholder="Paste a YouTube / Twitch / Kick stream link…">
+          <button class="linklike" id="batchToggle">＋ Batch Import (many links)</button>
+          <textarea id="batchInput" class="link-input hidden" rows="4" placeholder="One link per line…"></textarea>
+          <h3>2. Clip Detection Settings</h3>
+          <div class="lbl">Clip Duration</div>
+          <div class="pills" id="durPills">
+            <button>15s</button><button class="on">30s</button><button>45s</button><button>60s</button><button>90s</button><button>Custom</button>
+          </div>
+          <div class="lbl">Highlights</div>
+          <div class="pills" id="hlPills">
+            <button>3</button><button class="on">5</button><button>10</button><button>20</button>
+          </div>
+          <label class="chk"><input type="checkbox" checked> Audio peak detection</label>
+          <label class="chk"><input type="checkbox" checked> Exciting reaction detection</label>
+          <label class="chk"><input type="checkbox" checked> Scene change detection</label>
+          <button class="btn-grad wide" id="analyzeBtn">⚡ Analyze Highlights</button>
+          <div class="ring-wrap hidden" id="ringWrap">
+            <div class="ring"><span id="ringPct">0%</span></div>
+            <div class="muted" id="ringStage">Reading the stream…</div>
+          </div>
+        </div>
+
+        <div class="preview-col">
+          <div class="phone">
+            <span class="live">● LIVE</span><span class="ptime">0:27</span>
+            <div class="phone-cap">THIS IS <span>INSANE!</span></div>
+            <div class="phone-ctl">▶ ━━━━━━━●━━━ 🔊 ⛶</div>
+          </div>
+          <div class="panel export-box">
+            <h3>Export Settings</h3>
+            <div>✔ 9:16 Vertical &nbsp; ✔ 1080 × 1920 &nbsp; ✔ 60 FPS</div>
+            <div>✔ MP4 • H.264 • AAC &nbsp; ✔ Captions burned in</div>
+            <button class="btn-purple wide">Export Clip</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Caption Style</h3>
+          <select id="capStyle" class="link-input">
+            <option>Bold Pop</option><option selected>Karaoke</option><option>Neon Glow</option>
+            <option>Minimal</option><option>Comic Pop</option><option>Typewriter</option>
+            <option>Cinema</option><option>Bubble</option>
           </select>
-        </label>
-        <label>Max length
-          <select id="clipLength">
-            <option value="30">30s</option>
-            <option value="45" selected>45s</option>
-            <option value="60">60s</option>
-          </select>
-        </label>
-        <label>Language
-          <select id="clipLang">
-            <option value="en" selected>English</option>
-            <option value="banglish">Banglish</option>
-            <option value="bn">Bangla</option>
-          </select>
-        </label>
-        <label>Caption style
-          <select id="captionStyle">
-            <option>Bold Pop</option>
-            <option>Karaoke</option>
-            <option>Neon Glow</option>
-            <option>Minimal</option>
-            <option>Comic Pop</option>
-            <option>Typewriter</option>
-            <option>Cinema</option>
-            <option>Bubble</option>
-          </select>
-        </label>
+          <div class="lbl">Highlight Color</div>
+          <div class="swatches"><span class="sw on" style="background:#ffd21f"></span><span class="sw" style="background:#37e08b"></span><span class="sw" style="background:#37c8e0"></span><span class="sw" style="background:#a06bff"></span><span class="sw" style="background:#ff8a3c"></span><span class="sw" style="background:#ff4d5e"></span></div>
+          <div class="lbl">Caption Position</div>
+          <div class="pills"><button>Top</button><button>Center</button><button class="on">Bottom</button></div>
+          <label class="chk"><input type="checkbox" checked> Show Captions</label>
+          <label class="chk"><input type="checkbox"> Add Watermark</label>
+          <div class="brand-prev">Aa — Brand preview<br><span class="muted">One global style for every clip</span></div>
+        </div>
       </div>
-      <button type="submit" class="make-btn">🎬 Make Clips</button>
-    </form>
-    <p id="platformBadge" class="badge-line"></p>
 
-    <div id="progressWrap" class="progress-wrap hidden">
-      <div class="ring">
-        <svg viewBox="0 0 120 120">
-          <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
-          <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="52"></circle>
-        </svg>
-        <div class="ring-text"><span id="ringPct">0%</span><small id="ringStage">Starting…</small></div>
+      <h2>Suggested Clips</h2>
+      <div class="clips" id="clipsGrid"></div>
+    </section>
+
+    <!-- PROJECTS VIEW -->
+    <section id="view-projects" class="view hidden">
+      <h2>Projects</h2>
+      <div class="projects" id="projectsFull"></div>
+    </section>
+
+    <!-- EXPORT VIEW -->
+    <section id="view-export" class="view hidden">
+      <h2>Export Studio</h2>
+      <div class="panel">
+        <div class="pills"><button class="on">YouTube Shorts</button><button>TikTok</button><button>Instagram Reels</button><button>Generic Vertical</button></div>
+        <p class="muted">Presets only change the export label — output always stays 9:16 vertical, 1080×1920.</p>
+        <button class="btn-purple">⬇ One-Click Export All (ZIP)</button>
+        <h3>Export History</h3>
+        <div>✅ GTA 6 DAY 3 — 6 clips <span class="muted">• exported</span></div>
+        <div>✅ GTA 6 DAY 4 — 5 clips <span class="muted">• exported</span></div>
+        <div>✅ GTA 6 DAY 3 (first run) — 2 clips <span class="muted">• exported</span></div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="panel">
-    <h2>Clips</h2>
-    <div class="render-head">
-      <div>
-        <strong id="renderTitle">FIRST TO BEAT GTA 6 (By Cheating) | DAY 4</strong>
-        <p class="muted" id="renderMeta">Real renders · 1 video · Done</p>
+    <!-- CAPTIONS VIEW -->
+    <section id="view-captions" class="view hidden">
+      <h2>Caption Studio</h2>
+      <div class="panel">
+        <p>Auto captions are generated by the engine (Whisper) in <b>English, Bangla, Banglish and Hindi</b>, with word-by-word karaoke timing. One global brand kit — style, highlight color, position, watermark — applies to every clip automatically.</p>
+        <p class="muted">Styles: Bold Pop • Karaoke • Neon Glow • Minimal • Comic Pop • Typewriter • Cinema • Bubble</p>
       </div>
-      <button type="button" class="zip-btn" id="zipBtn">⬇ Download all (zip)</button>
-    </div>
-    <div id="clips" class="clips"></div>
-    <p class="demo-note">Static demo of the ClipKoro design — in the live app (inside Muse) these are
-    real MP4 clips rendered by the PeakCut engine, with working play and download.</p>
-  </section>
-</main>
+    </section>
 
-<footer>ClipKoro — built for streamers and clippers.</footer>
+    <!-- ROADMAP VIEW -->
+    <section id="view-roadmap" class="view hidden">
+      <h2>Feature Roadmap — 33-item checklist</h2>
+      <div class="panel">
+        <p><b>13 Done • 13 Partial (via the engine) • 7 Planned</b></p>
+        <p class="muted">Planned / not possible on this setup: NVIDIA CUDA &amp; NVENC (needs a GPU machine), in-browser timeline rendering, phone-side offline processing, platform OAuth connections. Honest status, always.</p>
+      </div>
+    </section>
+
+    <!-- SETTINGS VIEW -->
+    <section id="view-settings" class="view hidden">
+      <h2>Settings</h2>
+      <div class="panel">
+        <div id="deviceCard">This device: detecting…</div>
+        <p class="muted">Defaults (caption style, language, duration, highlights, FPS) pre-fill the Create Clip form. Privacy: local-first — your videos are processed by the local engine, no paid AI API, no key needed.</p>
+      </div>
+    </section>
+
+    <footer class="foot">ClipKoro v2.0.0 • Made for Creators • Create • Edit • Share • Your videos stay private — processed locally</footer>
+  </main>
+</div>
 <script src="app.js"></script>
 </body>
 </html>
