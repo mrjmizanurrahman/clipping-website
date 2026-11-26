@@ -55,7 +55,7 @@
       </div>
       <div class="ticks" aria-hidden="true"></div>
       <div class="stats">
-        <div class="stat"><div class="stat-label">Total projects</div><div class="stat-value">3</div><svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="0,18 25,14 50,15 75,8 100,5"/></svg></div>
+        <div class="stat"><div class="stat-label">Total projects</div><div class="stat-value">4</div><svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="0,18 25,14 50,15 75,8 100,5"/></svg></div>
         <div class="stat"><div class="stat-label">Clips ready</div><div class="stat-value">13</div><svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="0,20 25,16 50,10 75,9 100,3"/></svg></div>
         <div class="stat"><div class="stat-label">Total exported videos</div><div class="stat-value">13</div><svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="0,19 25,17 50,12 75,7 100,4"/></svg></div>
         <div class="stat"><div class="stat-label">Engine status</div><div class="stat-value small">Online · AI ready</div><svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="0,12 25,12 50,11 75,12 100,12"/></svg></div>
@@ -156,6 +156,8 @@
         <div class="activity-row"><span>GTA 6 DAY 3 — 6 clips rendered</span><span class="muted">Finished</span></div>
         <div class="activity-row"><span>GTA 6 DAY 4 — 5 clips rendered</span><span class="muted">Finished</span></div>
         <div class="activity-row"><span>First GTA 6 job — 2 clips kept</span><span class="muted">Finished</span></div>
+        <div class="activity-row"><span>GTA 6 DAY 5 — stopped at 5%</span><span class="row-actions"><span class="badge error">Error</span><button class="btn small resume-btn">Resume</button></span></div>
+        <div class="resume-note muted" id="day5Note" hidden>Demo: in the full app Resume re-runs the job from its saved transcript. This one is currently blocked because YouTube is not letting the engine download the video — the durable fix is adding YouTube cookies.</div>
       </div>
     </section>
 
@@ -163,8 +165,12 @@
     <section class="view" id="view-create">
       <h2 class="section-title">Create clip</h2>
       <div class="panel">
-        <p class="note">The full create form lives on the Dashboard in this demo, mirroring the app. In the live ClipKoro app this view holds the same link paste, batch import, durations (15s–90s), highlight counts and detection settings, wired to the real engine.</p>
-        <button class="btn accent" data-goto="dashboard">Go to the create form</button>
+        <label class="field-label" for="createLinkInput">Video link</label>
+        <div class="link-row">
+          <input id="createLinkInput" type="url" placeholder="Paste a YouTube / Twitch / Kick link">
+          <button class="btn accent" id="createGoBtn">Analyze highlights</button>
+        </div>
+        <p class="note">This takes you to the full create form on the Dashboard — batch import, durations (15s–90s), highlight counts and caption settings — with your link already filled in and the analysis started. In the live ClipKoro app the same form is wired to the real PeakCut engine.</p>
       </div>
     </section>
 
@@ -225,8 +231,8 @@
         <div class="stat"><div class="stat-label">Planned</div><div class="stat-value">7</div></div>
       </div>
       <div class="panel">
-        <p class="note">Done: dashboard, link + batch import, highlight detection, captions with 8 styles, vertical 9:16 rendering, per-clip length adjust with real re-render, MP4 + zip export, projects tools, settings defaults, privacy controls, activity and export history.</p>
-        <p class="note">Planned, honestly not possible on the current engine machine: GPU rendering (CUDA / NVENC — the machine has no GPU), in-browser timeline rendering, phone-side offline processing, platform OAuth sign-in.</p>
+        <div id="roadmapList"></div>
+        <p class="note">Planned items are honestly not possible on the current engine machine: it has no GPU, and the full app runs inside Muse rather than as an installable phone app.</p>
       </div>
     </section>
 
@@ -234,17 +240,28 @@
     <section class="view" id="view-settings">
       <h2 class="section-title">Settings</h2>
       <div class="panel">
-        <div class="activity-row"><span>Default caption style</span><span class="muted">Bold Pop</span></div>
-        <div class="activity-row"><span>Default duration</span><span class="muted">30s</span></div>
+        <label class="field-label" for="setStyle">Default caption style</label>
+        <select id="setStyle" class="select">
+          <option>Bold Pop</option><option>Karaoke</option><option>Neon Glow</option><option>Minimal</option>
+          <option>Comic Pop</option><option>Typewriter</option><option>Cinema</option><option>Bubble</option>
+        </select>
+        <label class="field-label" for="setDuration">Default duration</label>
+        <select id="setDuration" class="select">
+          <option>15s</option><option selected>30s</option><option>45s</option><option>60s</option><option>90s</option>
+        </select>
         <div class="activity-row"><span>Frame rate</span><span class="muted">30 fps</span></div>
         <div class="activity-row"><span>This device</span><span class="muted" id="deviceInfo">Detecting…</span></div>
-        <p class="note">Defaults saved in Settings pre-fill the Create form in the full app. Privacy: clear cache and delete all projects live here too.</p>
+        <div class="export-actions">
+          <button class="btn accent" id="settingsSaveBtn">Save defaults</button>
+          <span class="note" id="settingsSaved" hidden>Saved — the Create form now starts with these defaults (demo).</span>
+        </div>
+        <p class="note">In the full app these defaults genuinely pre-fill the Create form, and Privacy lives here too: clear cache and delete all projects.</p>
       </div>
     </section>
 
     <footer class="footer">
       <div class="ticks" aria-hidden="true"></div>
-      <p>ClipKoro — static demo of the live app. The full version runs inside Muse, connected to the local PeakCut engine, and renders real MP4 clips. Design: quiet chrome, one violet accent, colour lives in the clips — an "unslop" pass (skill by Damir Sokolovsky, CC BY 4.0).</p>
+      <p>ClipKoro — static demo of the live app. The full version runs inside Muse, connected to the local PeakCut engine, and renders real MP4 clips. The live app also has the Flowstate fluid hero on its Dashboard, a Resume button for failed jobs, and its AI routed through a local FreeLLMAPI pool (Gemini + Pollinations) so one provider's quota ending does not stop clipping. Design: quiet chrome, one violet accent, colour lives in the clips — an "unslop" pass (skill by Damir Sokolovsky, CC BY 4.0).</p>
     </footer>
   </main>
 </div>

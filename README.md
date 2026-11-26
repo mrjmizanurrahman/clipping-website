@@ -7,8 +7,10 @@ captioned vertical clips, ready for Shorts / TikTok / Reels.
 runs inside Muse, connected to a local PeakCut engine that does the real
 work: downloading the stream, transcribing speech, scoring the best moments,
 and rendering real MP4 files. This demo mirrors the app's interface and uses
-the real clip titles and scores from actual renders — its buttons animate,
-but nothing renders here and no data leaves the page.
+the real clip titles and scores from actual renders — every button on the
+page works (approve / reject, rename, duplicate, sort, settings, a real
+zip download of the clip kits), but nothing renders video here and no
+data leaves the page.
 
 ## What the live app does
 
@@ -37,6 +39,21 @@ but nothing renders here and no data leaves the page.
 
 ## Latest passes
 
+- **GitHub fix pass (this push):** the demo was click-tested end to end and
+  everything thin or dead was repaired — Reject now removes the card with
+  feedback (it also deletes the clip from the demo list), project Rename,
+  Duplicate and sort pills are wired, the Roadmap shows the full 33-item
+  checklist with Done / Partial / Planned badges (13 / 13 / 7), Settings
+  defaults are real controls that pre-fill the Create form, the Create
+  view carries your link into the Dashboard form and starts the analysis,
+  the preview plays and pauses, Export-all downloads a real zip file, and
+  the DAY 5 project appears with its Error badge and a Resume button —
+  mirroring the live app, where Resume genuinely re-runs a failed job.
+- **Resume + Flowstate (live app):** failed jobs can be resumed from their
+  saved transcript instead of starting over, and the live Dashboard hero
+  carries the Flowstate WebGL fluid mix. The live app's AI also routes
+  through a local FreeLLMAPI pool (Gemini + Pollinations) so one free
+  quota ending no longer stops clipping.
 - **Master rebuild + test pass:** every feature re-audited and all backend
   actions exercised live. Headline fix — large downloads (a 39 MB clip,
   63 MB and 102 MB project zips) used to die mid-transfer; they now stream
@@ -54,7 +71,8 @@ but nothing renders here and no data leaves the page.
 ## Honest limits
 
 - This demo cannot render video; downloads here are small "clip kit" text
-  files. The live app downloads the real MP4s.
+  files (Export-all bundles them into a real .zip). The live app downloads
+  the real MP4s.
 - GPU rendering (CUDA / NVENC), in-browser timeline rendering, phone-side
   offline processing and platform OAuth sign-in are planned, not faked —
   they need hardware or accounts this setup does not have.

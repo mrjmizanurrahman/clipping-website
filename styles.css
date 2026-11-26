@@ -113,6 +113,20 @@ input[type=url],input[type=search],textarea{flex:1;background:var(--bg);border:1
 .footer{margin-top:36px}
 .footer p{color:var(--muted);font-size:12px;line-height:1.6;margin-top:12px}
 
+/* Fix pass additions: badges, roadmap, settings selects, toast, resume */
+.badge{font-size:11px;border:1px solid var(--border);border-radius:999px;padding:2px 8px;color:var(--muted);white-space:nowrap}
+.badge.done{color:var(--ok);border-color:var(--ok)}
+.badge.partial{color:var(--warn);border-color:var(--warn)}
+.badge.error{color:#e88;border-color:#e88}
+.row-actions{display:flex;gap:8px;align-items:center}
+.resume-note{font-size:12px;line-height:1.5;padding:8px 0 4px}
+.roadmap-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px}
+.roadmap-row:last-child{border-bottom:0}
+.select{background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px 12px;font:inherit;font-size:14px;width:100%;max-width:320px;display:block}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(16px);background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 16px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:50;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.preview{cursor:pointer}
+
 @media (max-width:900px){
   .sidebar{display:none}
   .stats{grid-template-columns:repeat(2,1fr)}

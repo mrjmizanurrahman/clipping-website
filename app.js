@@ -1,8 +1,23 @@
-// ClipKoro static demo — mirrors the live app after the master rebuild (v22)
-// and the unslop design pass (v23). The live app runs inside Muse and renders
-// REAL MP4 clips with the PeakCut engine. This GitHub copy is a static demo:
-// controls animate and respond, but nothing renders and no data leaves the page.
+// ClipKoro static demo — mirrors the live app after the master rebuild (v22),
+// the unslop design pass (v23), the Resume feature (v24) and the Flowstate
+// hero mix (v25), plus the GitHub fix pass: every control on this page works.
+// The live app runs inside Muse and renders REAL MP4 clips with the PeakCut
+// engine. This GitHub copy is a static demo: controls animate and respond,
+// downloads are real files (clip kits / a real zip of kits), but nothing
+// renders video and no data leaves the page.
 (function () {
+  // ---- Toast ----
+  var toast = document.createElement("div");
+  toast.className = "toast";
+  document.body.appendChild(toast);
+  var toastTimer = null;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 2600);
+  }
+
   // ---- View switching ----
   var navBtns = document.querySelectorAll(".nav-item");
   function show(view) {
@@ -41,7 +56,7 @@
   var pctEl = document.getElementById("ringPct");
   var stageEl = document.getElementById("progressStage");
   var timer = null;
-  document.getElementById("analyzeBtn").addEventListener("click", function () {
+  function startAnalyze() {
     var link = document.getElementById("linkInput").value.trim();
     if (!link) { document.getElementById("linkInput").focus(); return; }
     wrap.hidden = false;
@@ -54,7 +69,43 @@
       stageEl.textContent = stages[Math.min(stages.length - 1, Math.floor(p / 100 * stages.length))];
       if (p >= 100) { clearInterval(timer); stageEl.textContent = "Done — clips are in Suggested clips below (demo)"; }
     }, 220);
+  }
+  document.getElementById("analyzeBtn").addEventListener("click", startAnalyze);
+
+  // ---- Create view mini form: carries the link to the Dashboard form ----
+  document.getElementById("createGoBtn").addEventListener("click", function () {
+    var v = document.getElementById("createLinkInput").value.trim();
+    show("dashboard");
+    if (v) {
+      document.getElementById("linkInput").value = v;
+      setTimeout(startAnalyze, 60);
+    } else {
+      document.getElementById("linkInput").focus();
+    }
   });
+
+  // ---- Preview play/pause (demo animation) ----
+  var preview = document.querySelector(".preview");
+  var scrubFill = document.querySelector(".scrub-fill");
+  var timeEl = document.querySelector(".preview-time");
+  var playT = 7, playing = false, playTimer = null;
+  function paintPreview() {
+    scrubFill.style.width = Math.round(playT / 27 * 100) + "%";
+    timeEl.textContent = "0:" + String(Math.floor(playT)).padStart(2, "0") + " / 0:27";
+  }
+  preview.addEventListener("click", function () {
+    playing = !playing;
+    if (playing) {
+      playTimer = setInterval(function () {
+        playT += 0.25;
+        if (playT >= 27) playT = 0;
+        paintPreview();
+      }, 250);
+    } else {
+      clearInterval(playTimer);
+    }
+  });
+  paintPreview();
 
   // ---- Clip data: the real renders from the live app ----
   var clips = [
@@ -72,19 +123,22 @@
   ];
 
   function fmt(s) { return "0:" + String(Math.round(s)).padStart(2, "0"); }
-  function kit(clip) {
-    // Demo download: a small "clip kit" text file. The full app downloads the real MP4.
-    var text = "ClipKoro clip kit (demo)\nTitle: " + clip.title + "\nScore: " + clip.score +
+  function kitText(clip) {
+    return "ClipKoro clip kit (demo)\nTitle: " + clip.title + "\nScore: " + clip.score +
       "\nDuration: " + Math.round(clip.dur) + "s\nFormat: 1080x1920, H.264, AAC, 30 fps\n" +
       "Note: the live ClipKoro app downloads the real rendered MP4 for this clip.";
-    var a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
-    a.download = clip.title.replace(/[^a-z0-9]+/gi, "-").toLowerCase() + "-clip-kit.txt";
-    a.click();
-    URL.revokeObjectURL(a.href);
   }
+  function slug(s) { return s.replace(/[^a-z0-9]+/gi, "-").toLowerCase(); }
+  function downloadBlob(blob, name) {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+  }
+  function kit(clip) { downloadBlob(new Blob([kitText(clip)], { type: "text/plain" }), slug(clip.title) + "-clip-kit.txt"); }
 
-  function clipCard(clip, withReview) {
+  function clipCard(clip) {
     var card = document.createElement("div");
     card.className = "clip-card";
     card.innerHTML =
@@ -96,8 +150,7 @@
       '<input class="length-input" type="number" min="5" max="120" value="' + Math.round(clip.dur) + '">' +
       '<button class="btn rerender">Re-render</button></div>' +
       '<div class="clip-actions"><button class="btn small download">Download</button>' +
-      (withReview ? '<button class="btn small approve">Approve</button><button class="btn small danger reject">Reject</button>' : "") +
-      "</div>";
+      '<button class="btn small approve">Approve</button><button class="btn small danger reject">Reject</button></div>';
     card.querySelector(".clip-title").textContent = clip.title;
     card.querySelector(".score").textContent = clip.score;
     var meta = card.querySelector(".clip-meta");
@@ -112,54 +165,226 @@
     });
     card.querySelector(".rerender").addEventListener("click", function () {
       clip.dur = Math.max(5, Math.min(120, Number(input.value) || clip.dur));
-      this.textContent = "Re-rendering…";
       var btn = this;
-      setTimeout(function () { btn.textContent = "Re-render"; paint(); }, 900);
+      btn.textContent = "Re-rendering…";
+      setTimeout(function () { btn.textContent = "Re-render"; paint(); showToast("Length updated (demo) — in the full app this really re-renders"); }, 900);
     });
     card.querySelector(".download").addEventListener("click", function () { kit(clip); });
-    var rej = card.querySelector(".reject");
-    if (rej) rej.addEventListener("click", function () { card.remove(); });
-    var app = card.querySelector(".approve");
-    if (app) app.addEventListener("click", function () { app.textContent = "Approved"; app.disabled = true; });
+    card.querySelector(".approve").addEventListener("click", function () {
+      this.textContent = "Approved"; this.disabled = true;
+      showToast("Approved (demo)");
+    });
+    card.querySelector(".reject").addEventListener("click", function () {
+      var i = clips.indexOf(clip);
+      if (i > -1) clips.splice(i, 1);
+      card.remove();
+      showToast("Rejected — clip removed (demo). In the full app this deletes the MP4 too.");
+    });
     return card;
   }
 
   var sg = document.getElementById("suggestedGrid");
-  clips.forEach(function (c) { sg.appendChild(clipCard(c, true)); });
+  clips.slice().forEach(function (c) { sg.appendChild(clipCard(c)); });
 
+  // ---- Projects ----
   var projects = [
-    { name: "Completing ALL of GTA 6 (All Side Missions) | DAY 4 - Part 2", count: 5, longest: 46 },
-    { name: "FIRST TO BEAT GTA 6 (By Cheating) | DAY 3", count: 6, longest: 27 },
-    { name: "FIRST TO BEAT GTA 6 (By Cheating) | DAY 3 — first job", count: 2, longest: 48 }
+    { name: "Completing ALL of GTA 6 (All Side Missions) | DAY 5", count: 0, longest: 0, error: true, fav: false },
+    { name: "Completing ALL of GTA 6 (All Side Missions) | DAY 4 - Part 2", count: 5, longest: 46, fav: false },
+    { name: "FIRST TO BEAT GTA 6 (By Cheating) | DAY 3", count: 6, longest: 27, fav: false },
+    { name: "FIRST TO BEAT GTA 6 (By Cheating) | DAY 3 — first job", count: 2, longest: 48, fav: false }
   ];
   var pg = document.getElementById("projectGrid");
+  function resumeDemo(btn, noteEl) {
+    btn.disabled = true;
+    btn.textContent = "Resuming…";
+    setTimeout(function () {
+      btn.textContent = "Resume";
+      btn.disabled = false;
+      if (noteEl) noteEl.hidden = false;
+      showToast("Still blocked — YouTube is not letting the engine download this video (demo)");
+    }, 1200);
+  }
   function paintProjects(list) {
     pg.innerHTML = "";
     list.forEach(function (p) {
       var card = document.createElement("div");
       card.className = "clip-card";
-      card.innerHTML = '<div class="clip-head"><div class="clip-title"></div><span class="score"></span></div>' +
-        '<div class="clip-meta"></div><div class="clip-actions">' +
-        '<button class="btn small fav">Favorite</button><button class="btn small">Rename</button>' +
-        '<button class="btn small">Duplicate</button><button class="btn small danger del">Delete</button></div>';
+      if (p.error) {
+        card.innerHTML = '<div class="clip-head"><div class="clip-title"></div><span class="badge error">Error</span></div>' +
+          '<div class="clip-meta">Stopped at 5% · 0 clips · the source video could not be downloaded again</div>' +
+          '<div class="clip-actions"><button class="btn small resume-btn">Resume</button>' +
+          '<button class="btn small danger del">Delete</button></div>' +
+          '<div class="resume-note muted" hidden>Demo: in the full app Resume re-runs the job from its saved transcript. This one is currently blocked because YouTube is not letting the engine download the video — the durable fix is adding YouTube cookies.</div>';
+      } else {
+        card.innerHTML = '<div class="clip-head"><div class="clip-title"></div><span class="score"></span></div>' +
+          '<div class="clip-meta"></div><div class="clip-actions">' +
+          '<button class="btn small fav">Favorite</button><button class="btn small rename">Rename</button>' +
+          '<button class="btn small dup">Duplicate</button><button class="btn small danger del">Delete</button></div>';
+        card.querySelector(".score").textContent = p.count + " clips";
+        card.querySelector(".clip-meta").textContent = "Longest clip " + fmt(p.longest) + " · rendered by PeakCut";
+        var favBtn = card.querySelector(".fav");
+        function paintFav() { favBtn.textContent = p.fav ? "Favorited" : "Favorite"; }
+        paintFav();
+        favBtn.addEventListener("click", function () { p.fav = !p.fav; paintFav(); });
+        card.querySelector(".rename").addEventListener("click", function () {
+          var n = window.prompt("Rename project", p.name);
+          if (n && n.trim()) { p.name = n.trim(); card.querySelector(".clip-title").textContent = p.name; showToast("Renamed (demo)"); }
+        });
+        card.querySelector(".dup").addEventListener("click", function () {
+          projects.unshift({ name: p.name + " (copy)", count: p.count, longest: p.longest, fav: false });
+          paintProjects(currentList());
+          showToast("Duplicated (demo) — in the full app this re-runs the same link");
+        });
+      }
       card.querySelector(".clip-title").textContent = p.name;
-      card.querySelector(".score").textContent = p.count + " clips";
-      card.querySelector(".clip-meta").textContent = "Longest clip " + fmt(p.longest) + " · rendered by PeakCut";
-      card.querySelector(".fav").addEventListener("click", function () { this.textContent = this.textContent === "Favorite" ? "Favorited" : "Favorite"; });
-      card.querySelector(".del").addEventListener("click", function () { card.remove(); });
+      var rb = card.querySelector(".resume-btn");
+      if (rb) rb.addEventListener("click", function () { resumeDemo(rb, card.querySelector(".resume-note")); });
+      card.querySelector(".del").addEventListener("click", function () {
+        var i = projects.indexOf(p);
+        if (i > -1) projects.splice(i, 1);
+        card.remove();
+        showToast("Project deleted (demo)");
+      });
       pg.appendChild(card);
     });
   }
-  paintProjects(projects);
-  document.getElementById("projectSearch").addEventListener("input", function () {
-    var q = this.value.toLowerCase();
-    paintProjects(projects.filter(function (p) { return p.name.toLowerCase().indexOf(q) > -1; }));
+  var sortMode = "newest";
+  function currentList() {
+    var q = document.getElementById("projectSearch").value.toLowerCase();
+    var list = projects.filter(function (p) { return p.name.toLowerCase().indexOf(q) > -1; });
+    if (sortMode === "longest") list = list.slice().sort(function (a, b) { return b.longest - a.longest; });
+    if (sortMode === "most") list = list.slice().sort(function (a, b) { return b.count - a.count; });
+    return list;
+  }
+  paintProjects(currentList());
+  document.getElementById("projectSearch").addEventListener("input", function () { paintProjects(currentList()); });
+  document.querySelectorAll("#sortPills .pill-btn").forEach(function (b) {
+    b.addEventListener("click", function () {
+      sortMode = b.textContent.indexOf("Longest") > -1 ? "longest" : (b.textContent.indexOf("Most") > -1 ? "most" : "newest");
+      paintProjects(currentList());
+    });
   });
 
+  // Dashboard Recent activity Resume (DAY 5 row)
+  var dashResume = document.querySelector("#view-dashboard .resume-btn");
+  if (dashResume) dashResume.addEventListener("click", function () {
+    resumeDemo(dashResume, document.getElementById("day5Note"));
+  });
+
+  // ---- Export all: a REAL zip (stored, no compression) of the clip kits ----
+  var crcTable = null;
+  function crc32(bytes) {
+    if (!crcTable) {
+      crcTable = [];
+      for (var n = 0; n < 256; n++) {
+        var c = n;
+        for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+        crcTable[n] = c >>> 0;
+      }
+    }
+    var crc = 0xFFFFFFFF;
+    for (var i = 0; i < bytes.length; i++) crc = crcTable[(crc ^ bytes[i]) & 0xFF] ^ (crc >>> 8);
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+  function buildZip(files) {
+    var enc = new TextEncoder();
+    var chunks = [], central = [], offset = 0;
+    files.forEach(function (f) {
+      var name = enc.encode(f.name), data = enc.encode(f.text), crc = crc32(data);
+      var lh = new DataView(new ArrayBuffer(30));
+      lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true);
+      lh.setUint32(14, crc, true); lh.setUint32(18, data.length, true); lh.setUint32(22, data.length, true);
+      lh.setUint16(26, name.length, true);
+      chunks.push(new Uint8Array(lh.buffer), name, data);
+      var ch = new DataView(new ArrayBuffer(46));
+      ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true);
+      ch.setUint16(8, 0x0800, true); ch.setUint32(16, crc, true);
+      ch.setUint32(20, data.length, true); ch.setUint32(24, data.length, true);
+      ch.setUint16(28, name.length, true); ch.setUint32(42, offset, true);
+      central.push(new Uint8Array(ch.buffer), name);
+      offset += 30 + name.length + data.length;
+    });
+    var centralSize = central.reduce(function (s, c) { return s + c.length; }, 0);
+    var end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0, 0x06054b50, true);
+    end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+    end.setUint32(12, centralSize, true); end.setUint32(16, offset, true);
+    return new Blob(chunks.concat(central, [new Uint8Array(end.buffer)]), { type: "application/zip" });
+  }
   document.getElementById("exportAllBtn").addEventListener("click", function () {
-    this.textContent = "Preparing zip… (demo)";
     var btn = this;
-    setTimeout(function () { btn.textContent = "One-click export all (zip)"; }, 1200);
+    btn.textContent = "Preparing zip…";
+    setTimeout(function () {
+      var files = [{ name: "manifest.txt", text: "ClipKoro export (demo)\n" + clips.length + " clip kits included.\nIn the live app this zip holds the real rendered MP4 files instead of text kits." }];
+      clips.forEach(function (c) { files.push({ name: slug(c.title) + "-clip-kit.txt", text: kitText(c) }); });
+      downloadBlob(buildZip(files), "clipkoro-export-all-demo.zip");
+      btn.textContent = "One-click export all (zip)";
+      showToast("Zip downloaded (demo) — clip kits inside; the full app zips the real MP4s");
+    }, 500);
+  });
+
+  // ---- Roadmap: the full 33-item checklist ----
+  var roadmap = [
+    ["Link paste → automatic best-moment clips", "done"],
+    ["Batch import — many links, queued one after another", "done"],
+    ["Live % ring with the current processing stage", "done"],
+    ["AI highlight detection with hype scores", "done"],
+    ["Word-by-word transcription captions", "done"],
+    ["8 caption styles with one global brand kit", "done"],
+    ["Caption languages: English, Banglish, Bangla, Hindi", "done"],
+    ["Vertical 9:16 rendering at 1080 × 1920", "done"],
+    ["Per-clip length adjust with a real re-render", "done"],
+    ["Approve / Reject on suggested clips", "done"],
+    ["MP4 download + one-click export-all zip", "done"],
+    ["Projects: search, sort, favorite, rename, duplicate, delete", "done"],
+    ["Resume for failed jobs (reuses the saved transcript)", "done"],
+    ["Caption Studio — style applies everywhere, no timeline editor yet", "partial"],
+    ["Export presets — Shorts / TikTok / Reels labels, output stays 9:16", "partial"],
+    ["Platform connections — link paste works, account sign-in not connected", "partial"],
+    ["Settings defaults pre-fill the Create form (main options)", "partial"],
+    ["Processing history — recent jobs, not a full archive", "partial"],
+    ["Live stream clipping — engine supports it, site flow is basic", "partial"],
+    ["Chat-spike detection — AI-estimated, no live chat feed yet", "partial"],
+    ["Durations 15s–90s — up to 20 clips per job", "partial"],
+    ["Device cards — this device vs engine computer, view only", "partial"],
+    ["GPU status panel — honest report; the engine machine has no GPU", "partial"],
+    ["Privacy controls — clear and delete in the app, no cloud backup", "partial"],
+    ["Downloads — chunked and verified, no pause/resume", "partial"],
+    ["Mobile layout — works; the fluid hero is desktop-first", "partial"],
+    ["GPU rendering (CUDA / NVENC)", "planned"],
+    ["In-browser timeline editor with rendering", "planned"],
+    ["Phone-side offline processing (installable app)", "planned"],
+    ["Platform account sign-in + auto-posting", "planned"],
+    ["Real live-chat telemetry for hype scores", "planned"],
+    ["50 clips per job", "planned"],
+    ["Public share link for the full live app", "planned"]
+  ];
+  var rl = document.getElementById("roadmapList");
+  roadmap.forEach(function (item) {
+    var row = document.createElement("div");
+    row.className = "roadmap-row";
+    var label = item[1] === "done" ? "Done" : (item[1] === "partial" ? "Partial" : "Planned");
+    row.innerHTML = "<span></span>";
+    row.querySelector("span").textContent = item[0];
+    var b = document.createElement("span");
+    b.className = "badge " + (item[1] === "planned" ? "" : item[1]);
+    b.textContent = label;
+    row.appendChild(b);
+    rl.appendChild(row);
+  });
+
+  // ---- Settings: defaults genuinely pre-fill the Create form (demo) ----
+  document.getElementById("settingsSaveBtn").addEventListener("click", function () {
+    var style = document.getElementById("setStyle").value;
+    var dur = document.getElementById("setDuration").value;
+    document.querySelectorAll("#styleGrid .style-chip").forEach(function (chip) {
+      chip.classList.toggle("active", chip.textContent === style);
+    });
+    document.querySelectorAll("#durationPills .pill-btn").forEach(function (b) {
+      b.classList.toggle("active", b.textContent === dur);
+    });
+    document.getElementById("settingsSaved").hidden = false;
+    showToast("Defaults saved (demo)");
   });
 
   // ---- Real device detection (same idea as the live app's "This device" card) ----
