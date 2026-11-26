@@ -3,62 +3,54 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ClipStream — Best Moments, Automatically</title>
+<title>ClipKoro — Link dao, best clip nao</title>
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 <header class="topbar">
-  <div class="logo">✂️ ClipStream</div>
-  <button id="googleSignIn" class="google-btn">
-    <span class="g">G</span> Sign up with Google
-  </button>
+  <div class="logo">✂️ ClipKoro</div>
+  <div class="tagline">Link dao, best clip nao</div>
 </header>
 
 <main>
   <section class="hero">
-    <h1>Paste a live stream link.<br/>Get the best clips.</h1>
+    <h1>Paste a stream link.<br/>Get the best clips.</h1>
     <p>Works with <strong>YouTube</strong>, <strong>Twitch</strong> and <strong>Kick</strong>.
-    We find the moments where chat explodes and the streamer panics — and turn them into captioned clips.</p>
+    ClipKoro finds the best moments and turns them into captioned vertical clips.</p>
 
     <form id="clipForm" class="submit-box">
       <input id="streamUrl" type="url" required
-        placeholder="Paste YouTube / Twitch / Kick live stream link…" />
-      <button type="submit">Make Clips</button>
+        placeholder="Paste YouTube / Twitch / Kick stream link…" />
+      <select id="clipCount" aria-label="How many clips">
+        <option value="3">3 clips</option>
+        <option value="5" selected>5 clips</option>
+        <option value="10">10 clips</option>
+      </select>
+      <button type="submit">🎬 Make Clips</button>
     </form>
     <p id="platformBadge" class="badge"></p>
 
-    <label for="captionStyle">Caption style</label>
-    <select id="captionStyle">
-      <option value="classic">Classic — white on black box</option>
-      <option value="bold-pop">Bold Pop — big yellow bold</option>
-      <option value="neon">Neon — glowing cyan</option>
-      <option value="karaoke">Karaoke — word highlight</option>
-      <option value="minimal">Minimal — clean small text</option>
-      <option value="cinematic">Cinematic — letter-spaced uppercase</option>
-      <option value="hormozi">Hormozi — bold white + yellow keyword</option>
-      <option value="mrbeast">Beast — huge outlined pop</option>
-      <option value="bangla">Bangla Pop — colorful rounded box</option>
-      <option value="retro">Retro — monospace green terminal</option>
-    </select>
-  </section>
-
-  <section>
-    <h2>How moments are scored</h2>
-    <div class="cards">
-      <div class="card"><h3>💬 Chat spike</h3><p>When lots of people comment at the same time, that moment is important.</p></div>
-      <div class="card"><h3>😱 Panic detection</h3><p>Loud reactions, screaming and sudden panic raise the moment score.</p></div>
-      <div class="card"><h3>📝 Auto captions</h3><p>Every clip gets captions added automatically, ready for Shorts / TikTok / Reels.</p></div>
+    <div id="progressWrap" class="progress-wrap hidden">
+      <div class="ring">
+        <svg viewBox="0 0 120 120">
+          <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+          <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="52"></circle>
+        </svg>
+        <div class="ring-text"><span id="ringPct">0%</span><small id="ringStage">Starting…</small></div>
+      </div>
     </div>
   </section>
 
   <section>
-    <h2>Your clips</h2>
-    <div id="status" class="status">No stream submitted yet.</div>
+    <h2>Clips</h2>
+    <div id="status" class="status">No clips yet — paste a link above to make some.</div>
     <div id="clips" class="clips"></div>
+    <p class="demo-note">Static demo: the live ClipKoro app renders real MP4 clips with the
+    PeakCut engine. This page only previews the design and flow.</p>
   </section>
 </main>
 
-<footer>ClipStream — built for streamers and clippers.</footer>
+<footer>ClipKoro — built for streamers and clippers.</footer>
 <script src="app.js"></script>
 </body>
 </html>

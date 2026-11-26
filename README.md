@@ -1,37 +1,47 @@
-# ClipStream — Clipping Website
+# ClipKoro — Link dao, best clip nao
 
-Paste a live stream link, get the best moments as captioned clips.
+Paste a YouTube / Twitch / Kick stream link, get the best moments back as
+captioned vertical clips, ready for Shorts / TikTok / Reels.
 
-## Output ratio
-**Vertical 9:16 only** — clips, previews and caption layouts are locked to vertical (9:16), for Shorts / TikTok / Reels. (Corrected by Mizanur on 2026-11-26, replacing an earlier 16:9 note.)
+## What ClipKoro does
 
-## Supported platforms
-- YouTube
-- Twitch
-- Kick
+1. **Make Clips** — paste a stream link, choose how many clips (3 / 5 / 10),
+   and ClipKoro sends it to the rendering engine.
+2. The engine downloads the stream, transcribes the speech, and uses AI to
+   find the best moments (big reactions, funny/chaotic moments, highlights).
+3. **Clips** — finished clips appear in the Clips section: play them, download
+   the MP4, download all as a zip, or delete a clip you don't want.
 
-Just submit the stream link — everything else is automatic.
+That is the whole app — just **Make Clips** and **Clips**. Simple on purpose.
 
-## How best moments are found
-1. **Chat spike** — moments where many people comment at the same time are treated as important.
-2. **Panic detection** — moments where the streamer panics / reacts loudly score higher.
-3. **Auto captions** — every clip is generated with captions, ready for Shorts / TikTok / Reels.
+## Output
 
-## Sign-up
-Sign-up is with **Google** (button in the header). To enable real accounts,
-add a Google OAuth Client ID (Google Identity Services or Firebase Auth)
-in the backend config.
+- **Vertical 9:16 only** — 1080×1920 MP4, captions burned into the video.
+- Every clip gets an AI score so the best moments are easy to spot first.
 
-## Run locally
-Open `index.html` in a browser, or serve the folder:
+## How it works (engine)
+
+- Rendering engine: **PeakCut** (Python + FFmpeg + Whisper speech-to-text).
+- AI moment-finding runs through a free Gemini key with an automatic free
+  fallback (Pollinations) — **no paid API key needed**.
+- The engine currently runs on a CPU server (no GPU on that machine yet);
+  rendering works, it is just CPU-paced.
+
+## This repository
+
+This repo holds the static front-end demo of ClipKoro (`index.html`,
+`styles.css`, `app.js`) — open `index.html` in a browser or serve the folder:
 
 ```bash
 npx serve .
 ```
 
-## Roadmap (backend)
-- Stream/VOD ingestion for YouTube, Twitch and Kick
-- Live-chat collector to measure comment spikes in real time
-- Audio analysis for panic / loud-reaction detection
-- Speech-to-text caption generation and clip rendering
-- Google OAuth sign-in and per-user clip libraries
+The **live app** (connected to the real engine, real clips) runs as a
+full-stack app inside Muse, so it has no public URL; this demo shows the
+same design and flow without the engine behind it.
+
+## Supported platforms
+
+- YouTube
+- Twitch
+- Kick
