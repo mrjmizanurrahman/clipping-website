@@ -1,133 +1,172 @@
-// ClipKoro static demo — mirrors the live app (ClipForge-style dashboard).
-// The live app runs inside Muse and renders REAL MP4 clips with the PeakCut
-// engine. This GitHub copy is a static demo: buttons animate, nothing renders.
+// ClipKoro static demo — mirrors the live app after the master rebuild (v22)
+// and the unslop design pass (v23). The live app runs inside Muse and renders
+// REAL MP4 clips with the PeakCut engine. This GitHub copy is a static demo:
+// controls animate and respond, but nothing renders and no data leaves the page.
 (function () {
   // ---- View switching ----
-  const navItems = document.querySelectorAll('.nav-item');
+  var navBtns = document.querySelectorAll(".nav-item");
   function show(view) {
-    document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-    const el = document.getElementById('view-' + view);
-    if (el) el.classList.remove('hidden');
-    navItems.forEach(n => n.classList.toggle('active', n.dataset.view === view));
+    document.querySelectorAll(".view").forEach(function (v) { v.classList.remove("active"); });
+    var el = document.getElementById("view-" + view);
+    if (el) el.classList.add("active");
+    navBtns.forEach(function (b) { b.classList.toggle("active", b.dataset.view === view); });
+    window.scrollTo({ top: 0 });
   }
-  navItems.forEach(n => n.addEventListener('click', () => show(n.dataset.view)));
-  document.querySelectorAll('[data-goto]').forEach(b =>
-    b.addEventListener('click', () => show(b.dataset.goto)));
-
-  // ---- Real data from Mizanur's renders ----
-  const projects = [
-    { icon: '🏎️', title: 'GTA 6 — DAY 3 (rerun)', meta: '6 clips • YouTube live' },
-    { icon: '🚓', title: 'GTA 6 — DAY 4', meta: '5 clips • YouTube live' },
-    { icon: '💸', title: 'GTA 6 — DAY 3 (first run)', meta: '2 clips • YouTube live' }
-  ];
-  const projHTML = p => `<div class="project"><div class="thumb">${p.icon}</div><b>${p.title}</b><span class="muted">${p.meta}</span></div>`;
-  document.getElementById('projectsRow').innerHTML = projects.map(projHTML).join('');
-  document.getElementById('projectsFull').innerHTML = projects.map(projHTML).join('');
-
-  const clips = [
-    { icon: '🚓', title: 'Narrow Escape from a Cop Car', score: 85, dur: 26.9 },
-    { icon: '💰', title: '10k Deposit Chaos', score: 82, dur: 16.5 },
-    { icon: '🚗', title: 'Unexpected Luxury Car Reveal', score: 78, dur: 16.9 },
-    { icon: '🌉', title: 'Bridge Crossing Chaos', score: 75, dur: 18.0 },
-    { icon: '⭐', title: 'Four Stars to Strip Club Chaos', score: 70, dur: 16.1 },
-    { icon: '🏁', title: "Dylan Goes After Paul Walker's Car", score: 70, dur: 16.5 },
-    { icon: '🔫', title: 'Accidental Store Robbery in GTA 6', score: 83, dur: 20.0 },
-    { icon: '🚔', title: 'Escaping a 6 Star Wanted Level in GTA 6', score: 82, dur: 22.0 },
-    { icon: '⏰', title: '69 Hours into GTA 6 and Only 51% Done', score: 82, dur: 19.0 },
-    { icon: '🏃', title: 'Escaping the Cops in GTA 6', score: 78, dur: 17.0 },
-    { icon: '🌶️', title: 'Taking hot sauce shots every time they die in GTA 6', score: 78, dur: 21.0 }
-  ];
-  const grid = document.getElementById('clipsGrid');
-  grid.innerHTML = clips.map((c, i) => `
-    <div class="clip">
-      <div class="thumb">${c.icon}<span class="score">${c.score}%</span></div>
-      <b>${c.title}</b>
-      <div class="muted">Duration: <span id="dur-${i}">${c.dur.toFixed(1)}s</span> • 9:16 • 1080×1920</div>
-      <div class="clip-actions">
-        <button>▶ Play</button><button>⬇ MP4</button><button>🗑</button>
-      </div>
-      <div class="len-row">
-        <span>⏱ Clip length</span>
-        <button data-len="${i}" data-d="-10">−10s</button>
-        <button data-len="${i}" data-d="-5">−5s</button>
-        <button data-len="${i}" data-d="5">+5s</button>
-        <button data-len="${i}" data-d="10">+10s</button>
-      </div>
-      <div class="len-row">
-        <button class="ok-btn">✓ Approve</button>
-        <button class="rej-btn">✕ Reject</button>
-      </div>
-    </div>`).join('');
-
-  // Clip length buttons: in the LIVE app these re-render the clip through the
-  // engine; here they only adjust the demo number.
-  grid.addEventListener('click', e => {
-    const btn = e.target.closest('[data-len]');
-    if (btn) {
-      const i = +btn.dataset.len, d = +btn.dataset.d;
-      clips[i].dur = Math.min(120, Math.max(5, clips[i].dur + d));
-      document.getElementById('dur-' + i).textContent = clips[i].dur.toFixed(1) + 's';
-      return;
-    }
-    if (e.target.closest('.rej-btn')) {
-      const card = e.target.closest('.clip');
-      if (confirm('Reject and delete this clip? (demo)')) card.remove();
-    }
+  navBtns.forEach(function (b) { b.addEventListener("click", function () { show(b.dataset.view); }); });
+  document.querySelectorAll("[data-goto]").forEach(function (b) {
+    b.addEventListener("click", function () { show(b.dataset.goto); });
   });
+  document.querySelector(".search").addEventListener("click", function () { show("projects"); });
 
-  // ---- Pills ----
-  document.querySelectorAll('.pills').forEach(group => {
-    group.addEventListener('click', e => {
-      const b = e.target.closest('button'); if (!b) return;
-      group.querySelectorAll('button').forEach(x => x.classList.remove('on'));
-      b.classList.add('on');
+  // ---- Pill groups (single-select) ----
+  document.querySelectorAll(".pills").forEach(function (group) {
+    group.querySelectorAll(".pill-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        group.querySelectorAll(".pill-btn").forEach(function (x) { x.classList.remove("active"); });
+        btn.classList.add("active");
+      });
     });
   });
-  document.querySelectorAll('.swatches .sw').forEach(s =>
-    s.addEventListener('click', () => {
-      document.querySelectorAll('.swatches .sw').forEach(x => x.classList.remove('on'));
-      s.classList.add('on');
-    }));
+  document.querySelectorAll("#styleGrid .style-chip").forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      document.querySelectorAll("#styleGrid .style-chip").forEach(function (x) { x.classList.remove("active"); });
+      chip.classList.add("active");
+    });
+  });
 
-  // ---- Batch import toggle ----
-  const batch = document.getElementById('batchInput');
-  document.getElementById('batchToggle').addEventListener('click', () =>
-    batch.classList.toggle('hidden'));
-
-  // ---- Analyze demo: animated % ring ----
-  const stages = ['Reading the stream…', 'Transcribing speech (Whisper)…', 'Finding best moments…', 'Scoring highlights…', 'Rendering vertical clips…', 'Burning in captions…', 'Finishing the clips'];
-  document.getElementById('analyzeBtn').addEventListener('click', () => {
-    const wrap = document.getElementById('ringWrap');
-    const pct = document.getElementById('ringPct');
-    const stage = document.getElementById('ringStage');
-    wrap.classList.remove('hidden');
-    let p = 0;
-    const t = setInterval(() => {
-      p = Math.min(100, p + Math.random() * 7);
-      pct.textContent = Math.floor(p) + '%';
-      stage.textContent = stages[Math.min(stages.length - 1, Math.floor(p / (100 / stages.length)))];
-      if (p >= 100) { clearInterval(t); stage.textContent = 'Done — see Suggested Clips below (demo). In the live app these are real rendered MP4s.'; }
+  // ---- Analyze demo: animated % ring with stages ----
+  var stages = ["Reading the stream", "Transcribing speech", "Finding best moments", "Scoring highlights", "Rendering vertical clips", "Burning in captions", "Finishing the clips"];
+  var wrap = document.getElementById("progressWrap");
+  var ring = document.getElementById("ring");
+  var pctEl = document.getElementById("ringPct");
+  var stageEl = document.getElementById("progressStage");
+  var timer = null;
+  document.getElementById("analyzeBtn").addEventListener("click", function () {
+    var link = document.getElementById("linkInput").value.trim();
+    if (!link) { document.getElementById("linkInput").focus(); return; }
+    wrap.hidden = false;
+    var p = 0;
+    clearInterval(timer);
+    timer = setInterval(function () {
+      p = Math.min(100, p + Math.random() * 7 + 2);
+      ring.style.setProperty("--p", Math.floor(p));
+      pctEl.textContent = Math.floor(p) + "%";
+      stageEl.textContent = stages[Math.min(stages.length - 1, Math.floor(p / 100 * stages.length))];
+      if (p >= 100) { clearInterval(timer); stageEl.textContent = "Done — clips are in Suggested clips below (demo)"; }
     }, 220);
   });
 
-  // ---- CPU bar wiggle (demo) ----
-  const cpuBar = document.getElementById('cpuBar'), cpuVal = document.getElementById('cpuVal');
-  setInterval(() => {
-    const v = 30 + Math.round(Math.random() * 40);
-    cpuBar.style.width = v + '%'; cpuVal.textContent = v + '%';
-  }, 1800);
+  // ---- Clip data: the real renders from the live app ----
+  var clips = [
+    { title: "Narrow Escape from a Cop Car", score: 85, dur: 27, project: "GTA 6 DAY 3" },
+    { title: "10k Deposit Chaos", score: 82, dur: 17, project: "GTA 6 DAY 3" },
+    { title: "Unexpected Luxury Car Reveal", score: 78, dur: 27, project: "GTA 6 DAY 3" },
+    { title: "Bridge Crossing Chaos", score: 75, dur: 18, project: "GTA 6 DAY 3" },
+    { title: "Four Stars to Strip Club Chaos", score: 70, dur: 16, project: "GTA 6 DAY 3" },
+    { title: "Dylan Goes After Paul Walker's Car", score: 70, dur: 17, project: "GTA 6 DAY 3" },
+    { title: "Accidental Store Robbery in GTA 6", score: 83, dur: 46, project: "GTA 6 DAY 4" },
+    { title: "Escaping a 6 Star Wanted Level in GTA 6", score: 82, dur: 38, project: "GTA 6 DAY 4" },
+    { title: "69 Hours into GTA 6 and Only 51% Done", score: 82, dur: 30, project: "GTA 6 DAY 4" },
+    { title: "Escaping the Cops in GTA 6", score: 78, dur: 34, project: "GTA 6 DAY 4" },
+    { title: "Taking hot sauce shots every time they die in GTA 6", score: 78, dur: 29, project: "GTA 6 DAY 4" }
+  ];
 
-  // ---- This device (real browser info, like the live app) ----
-  const dc = document.getElementById('deviceCard');
-  if (dc) {
-    const cores = navigator.hardwareConcurrency || '?';
-    const ram = navigator.deviceMemory ? '~' + navigator.deviceMemory + ' GB' : 'n/a';
-    let gpu = 'unknown';
-    try {
-      const gl = document.createElement('canvas').getContext('webgl');
-      const dbg = gl && gl.getExtension('WEBGL_debug_renderer_info');
-      if (gl && dbg) gpu = gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL);
-    } catch (e) { /* keep unknown */ }
-    dc.innerHTML = `<b>This device</b><br>CPU cores: ${cores} • RAM: ${ram}<br>GPU: ${gpu}<br><span class="muted">Pages and players run on your device; heavy rendering runs on the engine computer.</span>`;
+  function fmt(s) { return "0:" + String(Math.round(s)).padStart(2, "0"); }
+  function kit(clip) {
+    // Demo download: a small "clip kit" text file. The full app downloads the real MP4.
+    var text = "ClipKoro clip kit (demo)\nTitle: " + clip.title + "\nScore: " + clip.score +
+      "\nDuration: " + Math.round(clip.dur) + "s\nFormat: 1080x1920, H.264, AAC, 30 fps\n" +
+      "Note: the live ClipKoro app downloads the real rendered MP4 for this clip.";
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+    a.download = clip.title.replace(/[^a-z0-9]+/gi, "-").toLowerCase() + "-clip-kit.txt";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function clipCard(clip, withReview) {
+    var card = document.createElement("div");
+    card.className = "clip-card";
+    card.innerHTML =
+      '<div class="clip-head"><div class="clip-title"></div><span class="score"></span></div>' +
+      '<div class="clip-meta"></div>' +
+      '<div class="length-row"><span class="tag">Clip length</span>' +
+      '<button class="btn" data-d="-10">−10s</button><button class="btn" data-d="-5">−5s</button>' +
+      '<button class="btn" data-d="5">+5s</button><button class="btn" data-d="10">+10s</button>' +
+      '<input class="length-input" type="number" min="5" max="120" value="' + Math.round(clip.dur) + '">' +
+      '<button class="btn rerender">Re-render</button></div>' +
+      '<div class="clip-actions"><button class="btn small download">Download</button>' +
+      (withReview ? '<button class="btn small approve">Approve</button><button class="btn small danger reject">Reject</button>' : "") +
+      "</div>";
+    card.querySelector(".clip-title").textContent = clip.title;
+    card.querySelector(".score").textContent = clip.score;
+    var meta = card.querySelector(".clip-meta");
+    function paint() { meta.textContent = clip.project + " · " + fmt(clip.dur) + " · 9:16 · captions on"; }
+    paint();
+    var input = card.querySelector(".length-input");
+    card.querySelectorAll("[data-d]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        clip.dur = Math.max(5, Math.min(120, clip.dur + Number(b.dataset.d)));
+        input.value = Math.round(clip.dur); paint();
+      });
+    });
+    card.querySelector(".rerender").addEventListener("click", function () {
+      clip.dur = Math.max(5, Math.min(120, Number(input.value) || clip.dur));
+      this.textContent = "Re-rendering…";
+      var btn = this;
+      setTimeout(function () { btn.textContent = "Re-render"; paint(); }, 900);
+    });
+    card.querySelector(".download").addEventListener("click", function () { kit(clip); });
+    var rej = card.querySelector(".reject");
+    if (rej) rej.addEventListener("click", function () { card.remove(); });
+    var app = card.querySelector(".approve");
+    if (app) app.addEventListener("click", function () { app.textContent = "Approved"; app.disabled = true; });
+    return card;
+  }
+
+  var sg = document.getElementById("suggestedGrid");
+  clips.forEach(function (c) { sg.appendChild(clipCard(c, true)); });
+
+  var projects = [
+    { name: "Completing ALL of GTA 6 (All Side Missions) | DAY 4 - Part 2", count: 5, longest: 46 },
+    { name: "FIRST TO BEAT GTA 6 (By Cheating) | DAY 3", count: 6, longest: 27 },
+    { name: "FIRST TO BEAT GTA 6 (By Cheating) | DAY 3 — first job", count: 2, longest: 48 }
+  ];
+  var pg = document.getElementById("projectGrid");
+  function paintProjects(list) {
+    pg.innerHTML = "";
+    list.forEach(function (p) {
+      var card = document.createElement("div");
+      card.className = "clip-card";
+      card.innerHTML = '<div class="clip-head"><div class="clip-title"></div><span class="score"></span></div>' +
+        '<div class="clip-meta"></div><div class="clip-actions">' +
+        '<button class="btn small fav">Favorite</button><button class="btn small">Rename</button>' +
+        '<button class="btn small">Duplicate</button><button class="btn small danger del">Delete</button></div>';
+      card.querySelector(".clip-title").textContent = p.name;
+      card.querySelector(".score").textContent = p.count + " clips";
+      card.querySelector(".clip-meta").textContent = "Longest clip " + fmt(p.longest) + " · rendered by PeakCut";
+      card.querySelector(".fav").addEventListener("click", function () { this.textContent = this.textContent === "Favorite" ? "Favorited" : "Favorite"; });
+      card.querySelector(".del").addEventListener("click", function () { card.remove(); });
+      pg.appendChild(card);
+    });
+  }
+  paintProjects(projects);
+  document.getElementById("projectSearch").addEventListener("input", function () {
+    var q = this.value.toLowerCase();
+    paintProjects(projects.filter(function (p) { return p.name.toLowerCase().indexOf(q) > -1; }));
+  });
+
+  document.getElementById("exportAllBtn").addEventListener("click", function () {
+    this.textContent = "Preparing zip… (demo)";
+    var btn = this;
+    setTimeout(function () { btn.textContent = "One-click export all (zip)"; }, 1200);
+  });
+
+  // ---- Real device detection (same idea as the live app's "This device" card) ----
+  var di = document.getElementById("deviceInfo");
+  if (di) {
+    var cores = navigator.hardwareConcurrency || "?";
+    var mobile = /Android|iPhone|iPad/i.test(navigator.userAgent) ? "Phone" : "Computer";
+    di.textContent = mobile + " · " + cores + " CPU threads · page and players run here; rendering stays on the engine computer";
   }
 })();
