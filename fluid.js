@@ -118,7 +118,8 @@ function getWebGLContext (canvas) {
         formatR = getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType);
     }
 
-    ga('send', 'event', isWebGL2 ? 'webgl2' : 'webgl', formatRGBA == null ? 'not supported' : 'supported');
+    // (The original engine pinged its author's Google Analytics here;
+    // removed — the demo has no GA, and the call killed the simulation.)
 
     return {
         gl,
