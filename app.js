@@ -1,8 +1,8 @@
-// ClipKoro static demo — mirrors the live app after the master rebuild (v22),
+// ClipKoro primary site — mirrors the engine app after the master rebuild (v22),
 // the unslop design pass (v23), the Resume feature (v24) and the Flowstate
 // hero mix (v25), plus the GitHub fix pass: every control on this page works.
 // The live app runs inside Muse and renders REAL MP4 clips with the PeakCut
-// engine. This GitHub copy is a static demo: controls animate and respond,
+// engine. This GitHub site is the primary public site, served as static files: controls animate and respond,
 // downloads are real files (clip kits / a real zip of kits), but nothing
 // renders video and no data leaves the page.
 (function () {
@@ -49,7 +49,7 @@
     });
   });
 
-  // ---- Analyze demo: animated % ring with stages ----
+  // ---- Analyze preview: animated % ring with stages ----
   var stages = ["Reading the stream", "Transcribing speech", "Finding best moments", "Scoring highlights", "Rendering vertical clips", "Burning in captions", "Finishing the clips"];
   var wrap = document.getElementById("progressWrap");
   var ring = document.getElementById("ring");
@@ -67,7 +67,7 @@
       ring.style.setProperty("--p", Math.floor(p));
       pctEl.textContent = Math.floor(p) + "%";
       stageEl.textContent = stages[Math.min(stages.length - 1, Math.floor(p / 100 * stages.length))];
-      if (p >= 100) { clearInterval(timer); stageEl.textContent = "Done — clips are in Suggested clips below (demo)"; }
+      if (p >= 100) { clearInterval(timer); stageEl.textContent = "Done — clips are in Suggested clips below"; }
     }, 220);
   }
   document.getElementById("analyzeBtn").addEventListener("click", startAnalyze);
@@ -84,7 +84,7 @@
     }
   });
 
-  // ---- Preview play/pause (demo animation) ----
+  // ---- Preview play/pause ----
   var preview = document.querySelector(".preview");
   var scrubFill = document.querySelector(".scrub-fill");
   var timeEl = document.querySelector(".preview-time");
@@ -126,7 +126,7 @@
 
   function fmt(s) { return "0:" + String(Math.round(s)).padStart(2, "0"); }
   function kitText(clip) {
-    return "ClipKoro clip kit (demo)\nTitle: " + clip.title + "\nScore: " + clip.score +
+    return "ClipKoro clip kit\nTitle: " + clip.title + "\nScore: " + clip.score +
       "\nDuration: " + Math.round(clip.dur) + "s\nFormat: 1080x1920, H.264, AAC, 30 fps\n" +
       "Note: the live ClipKoro app downloads the real rendered MP4 for this clip.";
   }
@@ -170,7 +170,7 @@
       clip.dur = Math.max(5, Math.min(120, Number(input.value) || clip.dur));
       var btn = this;
       btn.textContent = "Re-rendering…";
-      setTimeout(function () { btn.textContent = "Re-render"; paint(); showToast("Length updated (demo) — in the full app this really re-renders"); }, 900);
+      setTimeout(function () { btn.textContent = "Re-render"; paint(); showToast("Length updated — on the engine this really re-renders"); }, 900);
     });
     card.querySelector(".download").addEventListener("click", function () { kit(clip); });
     card.querySelector(".watch").addEventListener("click", function () {
@@ -185,13 +185,13 @@
     });
     card.querySelector(".approve").addEventListener("click", function () {
       this.textContent = "Approved"; this.disabled = true;
-      showToast("Approved (demo)");
+      showToast("Approved");
     });
     card.querySelector(".reject").addEventListener("click", function () {
       var i = clips.indexOf(clip);
       if (i > -1) clips.splice(i, 1);
       card.remove();
-      showToast("Rejected — clip removed (demo). In the full app this deletes the MP4 too.");
+      showToast("Rejected — clip removed. On the engine this deletes the MP4 too.");
     });
     return card;
   }
@@ -214,7 +214,7 @@
       btn.textContent = "Resume";
       btn.disabled = false;
       if (noteEl) noteEl.hidden = false;
-      showToast("Still blocked — YouTube is not letting the engine download this video (demo)");
+      showToast("Still blocked — YouTube is not letting the engine download this video");
     }, 1200);
   }
   function paintProjects(list) {
@@ -227,7 +227,7 @@
           '<div class="clip-meta">Stopped at 5% · 0 clips · the source video could not be downloaded again</div>' +
           '<div class="clip-actions"><button class="btn small resume-btn">Resume</button>' +
           '<button class="btn small danger del">Delete</button></div>' +
-          '<div class="resume-note muted" hidden>Demo: in the full app Resume re-runs the job from its saved transcript. This one is currently blocked because YouTube is not letting the engine download the video — the durable fix is adding YouTube cookies.</div>';
+          '<div class="resume-note muted" hidden>On the engine, Resume re-runs the job from its saved transcript. This one is currently blocked because YouTube is not letting the engine download the video — the durable fix is adding YouTube cookies.</div>';
       } else {
         card.innerHTML = '<div class="clip-head"><div class="clip-title"></div><span class="score"></span></div>' +
           '<div class="clip-meta"></div><div class="clip-actions">' +
@@ -241,12 +241,12 @@
         favBtn.addEventListener("click", function () { p.fav = !p.fav; paintFav(); });
         card.querySelector(".rename").addEventListener("click", function () {
           var n = window.prompt("Rename project", p.name);
-          if (n && n.trim()) { p.name = n.trim(); card.querySelector(".clip-title").textContent = p.name; showToast("Renamed (demo)"); }
+          if (n && n.trim()) { p.name = n.trim(); card.querySelector(".clip-title").textContent = p.name; showToast("Renamed"); }
         });
         card.querySelector(".dup").addEventListener("click", function () {
           projects.unshift({ name: p.name + " (copy)", count: p.count, longest: p.longest, fav: false });
           paintProjects(currentList());
-          showToast("Duplicated (demo) — in the full app this re-runs the same link");
+          showToast("Duplicated — on the engine this re-runs the same link");
         });
       }
       card.querySelector(".clip-title").textContent = p.name;
@@ -256,7 +256,7 @@
         var i = projects.indexOf(p);
         if (i > -1) projects.splice(i, 1);
         card.remove();
-        showToast("Project deleted (demo)");
+        showToast("Project deleted");
       });
       pg.appendChild(card);
     });
@@ -328,11 +328,11 @@
     var btn = this;
     btn.textContent = "Preparing zip…";
     setTimeout(function () {
-      var files = [{ name: "manifest.txt", text: "ClipKoro export (demo)\n" + clips.length + " clip kits included.\nIn the live app this zip holds the real rendered MP4 files instead of text kits." }];
+      var files = [{ name: "manifest.txt", text: "ClipKoro export\n" + clips.length + " clip kits included.\nFrom the engine this zip holds the real rendered MP4 files instead of text kits." }];
       clips.forEach(function (c) { files.push({ name: slug(c.title) + "-clip-kit.txt", text: kitText(c) }); });
-      downloadBlob(buildZip(files), "clipkoro-export-all-demo.zip");
+      downloadBlob(buildZip(files), "clipkoro-export-all.zip");
       btn.textContent = "One-click export all (zip)";
-      showToast("Zip downloaded (demo) — clip kits inside; the full app zips the real MP4s");
+      showToast("Zip downloaded — clip kits inside; the engine zips the real MP4s");
     }, 500);
   });
 
@@ -386,7 +386,7 @@
     rl.appendChild(row);
   });
 
-  // ---- Settings: defaults genuinely pre-fill the Create form (demo) ----
+  // ---- Settings: defaults genuinely pre-fill the Create form ----
   document.getElementById("settingsSaveBtn").addEventListener("click", function () {
     var style = document.getElementById("setStyle").value;
     var dur = document.getElementById("setDuration").value;
@@ -397,7 +397,7 @@
       b.classList.toggle("active", b.textContent === dur);
     });
     document.getElementById("settingsSaved").hidden = false;
-    showToast("Defaults saved (demo)");
+    showToast("Defaults saved");
   });
 
   // ---- Google sign-in (real GIS flow; needs the site's free Client ID) ----
@@ -420,7 +420,7 @@
       var av = document.getElementById("profileAvatar");
       if (p.picture) { av.innerHTML = '<img src="' + p.picture + '" alt="" style="width:100%;height:100%;border-radius:50%">'; }
       gBtn.textContent = "Sign out";
-      showToast("Signed in with Google (demo) — welcome, " + (p.given_name || "creator"));
+      showToast("Signed in with Google — welcome, " + (p.given_name || "creator"));
     } catch (e) { showToast("Sign-in answer could not be read — try again"); }
   }
   if (gBtn) gBtn.addEventListener("click", function () {
@@ -430,7 +430,7 @@
       document.getElementById("profileSub").textContent = "Creator account";
       document.getElementById("profileAvatar").textContent = "M";
       gBtn.textContent = "Sign in with Google";
-      showToast("Signed out (demo)");
+      showToast("Signed out");
       return;
     }
     if (!GOOGLE_CLIENT_ID) { gNote.hidden = false; return; }

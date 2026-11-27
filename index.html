@@ -6,7 +6,7 @@
 <title>ClipKoro — Link dao, best clip nao</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=14">
+<link rel="stylesheet" href="styles.css?v=15">
 </head>
 <body>
 <canvas id="fluidCanvas" aria-hidden="true"></canvas>
@@ -45,7 +45,7 @@
     </div>
     <div id="googleSigninArea">
       <button class="btn gbtn" id="googleSigninBtn">Sign in with Google</button>
-      <div class="note" id="googleSigninNote" hidden>Google sign-in is wired and ready — it goes live as soon as the site's free Google Client ID is added (one value in app.js, see README). On this static demo, sign-in only shows your Google name and photo here; making real clips still needs the engine in the full app.</div>
+      <div class="note" id="googleSigninNote" hidden>Google sign-in is wired and ready — it goes live as soon as the site's free Google Client ID is added (one value in app.js, see README). On this site, sign-in only shows your Google name and photo here; real clips are made by the ClipKoro engine (the Muse app + PeakCut) and published here.</div>
     </div>
   </aside>
 
@@ -67,6 +67,11 @@
         <div class="stat"><div class="stat-label">Clips ready</div><div class="stat-value">13</div><svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="0,20 25,16 50,10 75,9 100,3"/></svg></div>
         <div class="stat"><div class="stat-label">Total exported videos</div><div class="stat-value">13</div><svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="0,19 25,17 50,12 75,7 100,4"/></svg></div>
         <div class="stat"><div class="stat-label">Engine status</div><div class="stat-value small">Online · AI ready</div><svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="0,12 25,12 50,11 75,12 100,12"/></svg></div>
+      </div>
+
+      <h2 class="section-title">Engine power</h2>
+      <div class="panel">
+        <p class="note">Analysis runs on the engine’s CPU and RAM. Exports render on the engine too — GPU first (NVIDIA NVENC), then Quick Sync, then CPU. The current engine machine has no GPU, so exports render on CPU; the moment the engine runs on a PC with an NVIDIA GPU, exports switch to NVENC automatically. While a job runs, the engine’s Dashboard shows live CPU / RAM / GPU readings.</p>
       </div>
 
       <h2 class="section-title">Create clip</h2>
@@ -118,7 +123,7 @@
           <div class="ring" id="ring"><span id="ringPct">0%</span></div>
           <div>
             <div class="progress-stage" id="progressStage">Reading the stream</div>
-            <div class="progress-note">Live progress from the PeakCut engine in the full app. This static demo simulates the ring.</div>
+            <div class="progress-note">On the engine, this ring shows the PeakCut engine’s live progress. Here it previews the stages — finished clips are published to this site.</div>
           </div>
         </div>
       </div>
@@ -145,7 +150,7 @@
             <button class="style-chip">Cinema</button>
             <button class="style-chip">Bubble</button>
           </div>
-          <p class="note">One global brand kit applies the same caption style to every clip. Changing the style re-renders the clip in the full app.</p>
+          <p class="note">One global brand kit applies the same caption style to every clip. Changing the style re-renders the clip on the engine, and the new version is published here.</p>
           <h3>Export settings</h3>
           <ul class="check-list">
             <li>Vertical 9:16 · 1080 × 1920</li>
@@ -165,7 +170,7 @@
         <div class="activity-row"><span>GTA 6 DAY 4 — 5 clips rendered</span><span class="muted">Finished</span></div>
         <div class="activity-row"><span>First GTA 6 job — 2 clips kept</span><span class="muted">Finished</span></div>
         <div class="activity-row"><span>GTA 6 DAY 5 — stopped at 5%</span><span class="row-actions"><span class="badge error">Error</span><button class="btn small resume-btn">Resume</button></span></div>
-        <div class="resume-note muted" id="day5Note" hidden>Demo: in the full app Resume re-runs the job from its saved transcript. This one is currently blocked because YouTube is not letting the engine download the video — the durable fix is adding YouTube cookies.</div>
+        <div class="resume-note muted" id="day5Note" hidden>On the engine, Resume re-runs the job from its saved transcript. This one is currently blocked because YouTube is not letting the engine download the video — the durable fix is adding YouTube cookies.</div>
       </div>
     </section>
 
@@ -178,7 +183,7 @@
           <input id="createLinkInput" type="url" placeholder="Paste a YouTube / Twitch / Kick link">
           <button class="btn accent" id="createGoBtn">Analyze highlights</button>
         </div>
-        <p class="note">This takes you to the full create form on the Dashboard — batch import, durations (15s–90s), highlight counts and caption settings — with your link already filled in and the analysis started. In the live ClipKoro app the same form is wired to the real PeakCut engine.</p>
+        <p class="note">This takes you to the full create form on the Dashboard — batch import, durations (15s–90s), highlight counts and caption settings — with your link already filled in and the analysis started. The same form on the engine is wired to the real PeakCut engine, and finished clips are published to this site.</p>
       </div>
     </section>
 
@@ -195,7 +200,7 @@
         </div>
         <div class="export-actions">
           <button class="btn accent" id="exportAllBtn">One-click export all (zip)</button>
-          <span class="note">In the full app this downloads one zip with every rendered MP4. Large downloads were fixed to stream in chunks and verified byte-exact.</span>
+          <span class="note">From the engine this downloads one zip with every rendered MP4. Large downloads were fixed to stream in chunks and verified byte-exact.</span>
         </div>
         <h3>Export history</h3>
         <div class="activity-row"><span>GTA 6 DAY 3 — 6 clips</span><span class="muted">Exported</span></div>
@@ -216,7 +221,7 @@
         </div>
       </div>
       <div class="clip-grid" id="projectGrid"></div>
-      <p class="note">In the full app: favorite, rename, duplicate (re-runs the same link) and delete are all real and saved.</p>
+      <p class="note">On the engine: favorite, rename, duplicate (re-runs the same link) and delete are all real and saved; the projects shown here are the published results.</p>
     </section>
 
     <!-- PLATFORMS -->
@@ -240,7 +245,7 @@
       </div>
       <div class="panel">
         <div id="roadmapList"></div>
-        <p class="note">Planned items are honestly not possible on the current engine machine: it has no GPU, and the full app runs inside Muse rather than as an installable phone app.</p>
+        <p class="note">Planned items are honestly not possible on the current engine machine: it has no GPU, and the engine runs inside Muse rather than as an installable phone app.</p>
       </div>
     </section>
 
@@ -261,20 +266,20 @@
         <div class="activity-row"><span>This device</span><span class="muted" id="deviceInfo">Detecting…</span></div>
         <div class="export-actions">
           <button class="btn accent" id="settingsSaveBtn">Save defaults</button>
-          <span class="note" id="settingsSaved" hidden>Saved — the Create form now starts with these defaults (demo).</span>
+          <span class="note" id="settingsSaved" hidden>Saved — the Create form now starts with these defaults.</span>
         </div>
-        <p class="note">In the full app these defaults genuinely pre-fill the Create form, and Privacy lives here too: clear cache and delete all projects.</p>
+        <p class="note">On the engine these defaults genuinely pre-fill the Create form, and Privacy lives here too: clear cache and delete all projects.</p>
       </div>
     </section>
 
     <footer class="footer">
       <div class="ticks" aria-hidden="true"></div>
-      <p>ClipKoro — static demo of the live app. The full version runs inside Muse, connected to the local PeakCut engine, and renders real MP4 clips. The live app also has the Flowstate fluid hero on its Dashboard, a Resume button for failed jobs, and its AI routed through a local FreeLLMAPI pool (Gemini + Pollinations) so one provider's quota ending does not stop clipping. Design: quiet chrome, one violet accent, colour lives in the clips — an "unslop" pass (skill by Damir Sokolovsky, CC BY 4.0).</p>
+      <p>ClipKoro — this is the primary ClipKoro site. Real clips are generated by the ClipKoro engine (the Muse app, connected to the local PeakCut engine) and published here; this page is served as static files, so rendering happens on the engine, not in your browser. The engine also has the Flowstate fluid hero on its Dashboard, a Resume button for failed jobs, and its AI routed through a local FreeLLMAPI pool (Gemini + Pollinations) so one provider’s quota ending does not stop clipping. Design: quiet chrome, one violet accent, colour lives in the clips — an "unslop" pass (skill by Damir Sokolovsky, CC BY 4.0).</p>
     </footer>
   </main>
 </div>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="app.js?v=14"></script>
-<script src="fluid.js?v=14"></script>
+<script src="app.js?v=15"></script>
+<script src="fluid.js?v=15"></script>
 </body>
 </html>
