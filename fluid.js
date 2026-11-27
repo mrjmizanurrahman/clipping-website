@@ -1306,11 +1306,30 @@ function hashCode (s) {
 // ---- ClipKoro demo mount (Flowstate mix) ----
 // One shared canvas behind the whole app; static fallback on mobile /
 // reduced-motion / no-WebGL, matching the live app's rules.
+// Debug: open the page with ?fluiddebug=1 to bypass the guards and see
+// an on-page status box (guard values, errors, canvas size).
 (function () {
   var canvas = document.getElementById("fluidCanvas");
   if (!canvas) return;
+  var debug = /[?&]fluiddebug=1/.test(location.search);
+  var box = null;
+  function say(msg) {
+    if (!debug) return;
+    if (!box) {
+      box = document.createElement("div");
+      box.style.cssText = "position:fixed;left:8px;bottom:8px;z-index:99;background:#111;color:#7dff8a;font:12px monospace;padding:8px;max-width:92vw;white-space:pre-wrap";
+      document.body.appendChild(box);
+    }
+    box.textContent += msg + "\n";
+  }
   var mobile = /Mobi|Android/i.test(navigator.userAgent);
   var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (mobile || reduced) return;
-  try { fluidSimulation(canvas); } catch (e) { /* static near-black background remains */ }
+  say("guards: mobile=" + mobile + " reducedMotion=" + reduced);
+  if (!debug && (mobile || reduced)) { say("skipped by guard"); return; }
+  try {
+    fluidSimulation(canvas);
+    say("fluidSimulation started; canvas " + canvas.width + "x" + canvas.height);
+  } catch (e) {
+    say("ERROR: " + (e && e.message ? e.message : e));
+  }
 })();
