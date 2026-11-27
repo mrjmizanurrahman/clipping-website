@@ -39,7 +39,13 @@ data leaves the page.
 
 ## Latest passes
 
-- **GitHub fix pass (this push):** the demo was click-tested end to end and
+- **Flowstate full-site mix + Manrope (this push):** mirrors the live app —
+  one shared WebGL fluid canvas (the Flowstate engine, `fluid.js`) behind
+  the whole demo with the radial scrim, glass panels/sidebar, and the
+  Manrope font (400–800) with heavier headings, after the owner found the
+  previous Onest font hard to read over the fluid. Mobile and
+  reduced-motion visitors get the static near-black background.
+- **GitHub fix pass:** the demo was click-tested end to end and
   everything thin or dead was repaired — Reject now removes the card with
   feedback (it also deletes the clip from the demo list), project Rename,
   Duplicate and sort pills are wired, the Roadmap shows the full 33-item
