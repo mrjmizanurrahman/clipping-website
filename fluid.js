@@ -59,6 +59,265 @@ let config = {
     SUNRAYS_WEIGHT: 1.0,
 };
 
+// --- Engine core definitions restored from the original engine source.
+// They were lost when the engine was wrapped into fluidSimulation();
+// without them the simulation died silently on its first shader.
+function pointerPrototype () {
+    this.id = -1;
+    this.texcoordX = 0;
+    this.texcoordY = 0;
+    this.prevTexcoordX = 0;
+    this.prevTexcoordY = 0;
+    this.deltaX = 0;
+    this.deltaY = 0;
+    this.down = false;
+    this.moved = false;
+    this.color = [30, 0, 300];
+}
+
+let pointers = [];
+let splatStack = [];
+
+const { gl, ext } = getWebGLContext(canvas);
+
+function getWebGLContext (canvas) {
+    const params = { alpha: true, depth: false, stencil: false, antialias: false, preserveDrawingBuffer: false };
+
+    let gl = canvas.getContext('webgl2', params);
+    const isWebGL2 = !!gl;
+    if (!isWebGL2)
+        gl = canvas.getContext('webgl', params) || canvas.getContext('experimental-webgl', params);
+
+    let halfFloat;
+    let supportLinearFiltering;
+    if (isWebGL2) {
+        gl.getExtension('EXT_color_buffer_float');
+        supportLinearFiltering = gl.getExtension('OES_texture_float_linear');
+    } else {
+        halfFloat = gl.getExtension('OES_texture_half_float');
+        supportLinearFiltering = gl.getExtension('OES_texture_half_float_linear');
+    }
+
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+    const halfFloatTexType = isWebGL2 ? gl.HALF_FLOAT : halfFloat.HALF_FLOAT_OES;
+    let formatRGBA;
+    let formatRG;
+    let formatR;
+
+    if (isWebGL2)
+    {
+        formatRGBA = getSupportedFormat(gl, gl.RGBA16F, gl.RGBA, halfFloatTexType);
+        formatRG = getSupportedFormat(gl, gl.RG16F, gl.RG, halfFloatTexType);
+        formatR = getSupportedFormat(gl, gl.R16F, gl.RED, halfFloatTexType);
+    }
+    else
+    {
+        formatRGBA = getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType);
+        formatRG = getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType);
+        formatR = getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType);
+    }
+
+    ga('send', 'event', isWebGL2 ? 'webgl2' : 'webgl', formatRGBA == null ? 'not supported' : 'supported');
+
+    return {
+        gl,
+        ext: {
+            formatRGBA,
+            formatRG,
+            formatR,
+            halfFloatTexType,
+            supportLinearFiltering
+        }
+    };
+}
+
+function getSupportedFormat (gl, internalFormat, format, type)
+{
+    if (!supportRenderTextureFormat(gl, internalFormat, format, type))
+    {
+        switch (internalFormat)
+        {
+            case gl.R16F:
+                return getSupportedFormat(gl, gl.RG16F, gl.RG, type);
+            case gl.RG16F:
+                return getSupportedFormat(gl, gl.RGBA16F, gl.RGBA, type);
+            default:
+                return null;
+        }
+    }
+
+    return {
+        internalFormat,
+        format
+    }
+}
+
+function supportRenderTextureFormat (gl, internalFormat, format, type) {
+    let texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, 4, 4, 0, format, type, null);
+
+    let fbo = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+
+    let status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+    return status == gl.FRAMEBUFFER_COMPLETE;
+}
+
+function isMobile () {
+    return /Mobi|Android/i.test(navigator.userAgent);
+}
+
+function captureScreenshot () {
+    let res = getResolution(config.CAPTURE_RESOLUTION);
+    let target = createFBO(res.width, res.height, ext.formatRGBA.internalFormat, ext.formatRGBA.format, ext.halfFloatTexType, gl.NEAREST);
+    render(target);
+
+    let texture = framebufferToTexture(target);
+    texture = normalizeTexture(texture, target.width, target.height);
+
+    let captureCanvas = textureToCanvas(texture, target.width, target.height);
+    let datauri = captureCanvas.toDataURL();
+    downloadURI('fluid.png', datauri);
+    URL.revokeObjectURL(datauri);
+}
+
+function framebufferToTexture (target) {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, target.fbo);
+    let length = target.width * target.height * 4;
+    let texture = new Float32Array(length);
+    gl.readPixels(0, 0, target.width, target.height, gl.RGBA, gl.FLOAT, texture);
+    return texture;
+}
+
+function normalizeTexture (texture, width, height) {
+    let result = new Uint8Array(texture.length);
+    let id = 0;
+    for (let i = height - 1; i >= 0; i--) {
+        for (let j = 0; j < width; j++) {
+            let nid = i * width * 4 + j * 4;
+            result[nid + 0] = clamp01(texture[id + 0]) * 255;
+            result[nid + 1] = clamp01(texture[id + 1]) * 255;
+            result[nid + 2] = clamp01(texture[id + 2]) * 255;
+            result[nid + 3] = clamp01(texture[id + 3]) * 255;
+            id += 4;
+        }
+    }
+    return result;
+}
+
+function clamp01 (input) {
+    return Math.min(Math.max(input, 0), 1);
+}
+
+function textureToCanvas (texture, width, height) {
+    let captureCanvas = document.createElement('canvas');
+    let ctx = captureCanvas.getContext('2d');
+    captureCanvas.width = width;
+    captureCanvas.height = height;
+
+    let imageData = ctx.createImageData(width, height);
+    imageData.data.set(texture);
+    ctx.putImageData(imageData, 0, 0);
+
+    return captureCanvas;
+}
+
+function downloadURI (filename, uri) {
+    let link = document.createElement('a');
+    link.download = filename;
+    link.href = uri;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function createProgram (vertexShader, fragmentShader) {
+    let program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS))
+        console.trace(gl.getProgramInfoLog(program));
+
+    return program;
+}
+
+function getUniforms (program) {
+    let uniforms = [];
+    let uniformCount = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+    for (let i = 0; i < uniformCount; i++) {
+        let uniformName = gl.getActiveUniform(program, i).name;
+        uniforms[uniformName] = gl.getUniformLocation(program, uniformName);
+    }
+    return uniforms;
+}
+
+function compileShader (type, source, keywords) {
+    source = addKeywords(source, keywords);
+
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
+        console.trace(gl.getShaderInfoLog(shader));
+
+    return shader;
+}
+
+class Material {
+    constructor (vertexShader, fragmentShaderSource) {
+        this.vertexShader = vertexShader;
+        this.fragmentShaderSource = fragmentShaderSource;
+        this.programs = [];
+        this.activeProgram = null;
+        this.uniforms = [];
+    }
+
+    setKeywords (keywords) {
+        let hash = 0;
+        for (let i = 0; i < keywords.length; i++)
+            hash += hashCode(keywords[i]);
+
+        let program = this.programs[hash];
+        if (program == null)
+        {
+            let fragmentShader = compileShader(gl.FRAGMENT_SHADER, this.fragmentShaderSource, keywords);
+            program = createProgram(this.vertexShader, fragmentShader);
+            this.programs[hash] = program;
+        }
+
+        if (program == this.activeProgram) return;
+
+        this.uniforms = getUniforms(program);
+        this.activeProgram = program;
+    }
+
+    bind () {
+        gl.useProgram(this.activeProgram);
+    }
+}
+
+class Program {
+    constructor (vertexShader, fragmentShader) {
+        this.uniforms = {};
+        this.program = createProgram(vertexShader, fragmentShader);
+        this.uniforms = getUniforms(this.program);
+    }
+
+    bind () {
+        gl.useProgram(this.program);
+    }
+}
+
 function addKeywords (source, keywords) {
     if (keywords == null) return source;
     let keywordsString = '';
